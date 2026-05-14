@@ -1,0 +1,53 @@
+<%- layout("/layout/boilerplate") %>
+<body>
+  <div class="outermostDiv">
+    <div style="width: 300px">
+      <h2 class="mb-3 text-center fw-bold">Sign up</h2>
+      <form method="post" action="/signup" class="needs-validation" novalidate>
+        <div class="mb-2">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Create username"
+            name="username"
+            minlength="5"
+            required
+          />
+          <div class="invalid-feedback">
+            Username should be at least 5 characters!
+          </div>
+        </div>
+        <div class="mb-2 mt-1">
+          <input
+            type="password"
+            class="form-control"
+            placeholder="Create password"
+            name="password"
+            minlength="8"
+            required
+          />
+          <div class="invalid-feedback">
+            Password should be at least 8 characters!
+          </div>
+        </div>
+        <div class="form-check">
+          <input
+            class="form-check-input show-password show-password-mobile"
+            type="checkbox"
+            id="showPassword"
+          />
+          <label class="form-check-label" for="showPassword"
+            >Show password</label
+          >
+        </div>
+        <button type="submit" class="btn btn-danger w-100 my-2">Sign up</button>
+      </form>
+      <p>
+        Already have an account?
+        <a style="text-decoration: none" href="./login">Log in</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="/js/showPassswordCheckbox.js"></script>
+</body>

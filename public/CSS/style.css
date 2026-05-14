@@ -1,0 +1,1239 @@
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.container {
+  flex: 1;
+}
+
+/* wrapper div to center content */
+.outermostDiv {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* navbar */
+nav {
+  margin-bottom: 10px;
+  padding: 10px 0 !important;
+  font-size: 17px;
+}
+
+.fa-file-lines {
+  color: #fe424d;
+  font-size: xx-large;
+}
+
+/* cards */
+.card-body p {
+  margin: 0 !important;
+  font-size: 14px;
+}
+
+/* offcanvas css */
+@media (max-width: 780px) {
+  .offcanvas.offcanvas-end {
+    width: 75vw;
+    max-width: 75vw;
+  }
+}
+
+.offcanvas-body {
+  overflow-y: auto;
+}
+
+.offcanvas_anchorTags {
+  border: none !important;
+  color: black !important;
+}
+
+.offcanvasIcon {
+  color: #404040;
+  font-size: 18px;
+  margin-right: 5px;
+}
+
+/* flash alerts */
+.flash-alert {
+  width: 90%;
+  max-width: 300px;
+  margin: 10px auto;
+  white-space: normal;
+  word-break: break-word;
+}
+.flash-alert p {
+  margin: 0;
+}
+
+.subjectCard {
+  border: 1px solid #404040;
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  color: #404040;
+}
+
+.mainPageFunctionalitiesIcons {
+  background-color: #ffffff1f;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 19px !important;
+}
+/* Keep functionality links neutral (prevent default blue in light mode) */
+.funtionalies a,
+.funtionalies a:link,
+.funtionalies a:visited {
+  color: inherit;
+  text-decoration: none;
+}
+.funtionalies a:hover,
+.funtionalies a:active {
+  color: inherit;
+  text-decoration: none;
+}
+.mainPageFunctionalitiesIcons i {
+  color: inherit !important;
+}
+/* heart when liked */
+.mainPageFunctionalitiesIcons i.liked {
+  color: rgb(196, 38, 38) !important;
+}
+/* ---------------------------------------------
+Below styling is done by Ai Styling Assistant  /
+---------------------
+Privacy and Terms    \
+---------------------------------------------*/
+
+/* light mode footer background */
+footer {
+  background-color: silver;
+}
+
+/* active link indicator */
+/* active link indicator — color icon and text instead of underline */
+.nav-link.active:not(.no-active-color) {
+  color: #fe424d !important;
+}
+.nav-link.active:not(.no-active-color) i,
+.nav-link.active:not(.no-active-color) .fa-solid {
+  color: #fe424d !important;
+}
+.navbar-nav .nav-link {
+  display: inline-block;
+  padding-bottom: 6px; /* keep spacing consistent */
+}
+.nav-link.active:not(.no-active-color) {
+  border-bottom: none !important;
+}
+
+/* Prevent nav links from flashing the active color when clicked or focused
+   unless they actually have the `.active` class. This keeps Upload (and other
+   non-active links) from turning red on press while preserving the red color
+   for true active links. */
+.nav-link:not(.active):active,
+.nav-link:not(.active):focus {
+  color: inherit !important;
+  background-color: transparent !important;
+  text-decoration: none !important;
+}
+
+/* Offcanvas (mobile) — color text and icon when active */
+.offcanvas_anchorTags {
+  padding-bottom: 0.4rem;
+}
+.offcanvas_anchorTags.active {
+  color: #fe424d !important;
+}
+.offcanvas_anchorTags.active .offcanvasIcon {
+  color: #fe424d !important;
+}
+
+/* Prevent Bootstrap's active background in offcanvas list-group items
+   — keep link background transparent and only show the underline */
+.offcanvas .list-group-item.offcanvas_anchorTags.active,
+.offcanvas .list-group-item.offcanvas_anchorTags.active:hover,
+.offcanvas .list-group-item.offcanvas_anchorTags.active:focus {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+/* contributions tab buttons */
+.tab-button {
+  border: none;
+  background-color: transparent;
+  font-size: 17px;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+.tab-button.active {
+  border-bottom: 2px solid red !important;
+}
+
+.policy-container {
+  max-width: 900px;
+  margin: 32px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  color: #222;
+  line-height: 1.6;
+}
+.policy-title {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+.policy-updated {
+  text-align: center;
+  color: #666;
+  margin-bottom: 18px;
+}
+.policy-body p {
+  text-align: justify;
+  margin-bottom: 12px;
+}
+.policy-body h2 {
+  margin-top: 18px;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+.policy-body ul {
+  margin-left: 1.2rem;
+  margin-bottom: 12px;
+}
+
+/* small helper to shift headings/paragraphs when needed */
+.shifted {
+  margin-left: 1.5rem;
+}
+
+@media (max-width: 780px) {
+  .policy-container {
+    margin: 18px;
+    padding: 14px;
+  }
+  .policy-title {
+    font-size: 20px;
+  }
+}
+
+/* Mobile-only top and bottom bars: show only on widths <= 600px */
+.top-mobile-tabs,
+.bottom-nav {
+  display: none !important;
+}
+
+@media (max-width: 600px) {
+  .top-mobile-tabs,
+  .bottom-nav {
+    display: flex !important;
+  }
+
+  /* Make active links clear and prominent on mobile (icons + labels) */
+  .top-mobile-tabs .nav-link,
+  .bottom-nav .nav-link {
+    color: #ffffff; /* default mobile color (bottom has dark bg) */
+  }
+
+  .top-mobile-tabs .nav-link.active:not(.no-active-color),
+  .bottom-nav .nav-link.active:not(.no-active-color) {
+    color: #fe424d !important;
+  }
+
+  /* ensure bottom nav sits under comments sheet (comments z-index:2000) */
+  .bottom-nav {
+    z-index: 1900 !important;
+  }
+
+  /* Keep the top mobile tabs above the feed and comments and allow clicks */
+  .top-mobile-tabs {
+    position: fixed !important;
+    top: 8px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    padding: 0 12px !important;
+    z-index: 2200 !important; /* above comments (2000) and post overlays (2100) */
+    pointer-events: auto !important;
+    background: transparent !important;
+  }
+}
+
+/* Page-level search bar: hide on laptop/desktop; show on small screens (<=600px)
+   Use higher-specificity + !important to override Bootstrap's `.d-flex` utility. */
+.page-searchbar searchBar.d-flex,
+.page-searchbar searchBar {
+  display: none !important;
+}
+@media (max-width: 600px) {
+  .page-searchbar searchBar.d-flex,
+  .page-searchbar searchBar {
+    display: flex !important;
+  }
+}
+
+/* global loader overlay */
+#loader-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 2000;
+}
+#loader-overlay .spinner-border {
+  width: 4rem;
+  height: 4rem;
+}
+#loader-overlay p {
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+/* --------------------------------------------------------------------------
+  Dark / light mode support -- A `dark-mode` class is added to <body> when dark mode is active. JavaScript will toggle the class and persist the choice in localStorage.
+  All overrides are intentionally scoped to `body.dark-mode` so that the default styling remains unchanged for light mode. You can expand these selectors as you add new components.
+*/
+
+body.dark-mode {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+/* navbar and offcanvas */
+body.dark-mode nav,
+body.dark-mode .offcanvas {
+  background-color: transparent !important;
+}
+
+body.dark-mode .offcanvas-header,
+body.dark-mode .offcanvas-title a {
+  background-color: #1c1c1c;
+  color: #e0e0e0 !important;
+}
+
+body.dark-mode .navbar-brand,
+body.dark-mode .nav-link,
+body.dark-mode .offcanvas_anchorTags {
+  color: #e0e0e0 !important;
+}
+body.dark-mode .nav-link.active:not(.no-active-color),
+body.dark-mode .offcanvas_anchorTags.active {
+  border-bottom-color: #ff8686 !important;
+}
+
+/* cards and panels */
+body.dark-mode .card,
+body.dark-mode .policy-container,
+body.dark-mode .subjectCard,
+body.dark-mode .flash-alert,
+body.dark-mode .offcanvas-body {
+  background-color: #1f1f1f;
+  color: #e0e0e0;
+}
+
+/* contributions tab buttons should stay light in dark mode */
+body.dark-mode .tab-button,
+body.dark-mode .tab-button.active {
+  color: #e0e0e0 !important;
+}
+
+/* if any icons appear on tab buttons, inherit light color */
+body.dark-mode .tab-button i {
+  color: inherit !important;
+}
+
+/* forms, inputs, alerts, etc. inherit text color automatically and ensure standalone inputs/selects/textarea also obey dark mode */
+body.dark-mode .form-control,
+body.dark-mode .form-select,
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+  background-color: #2a2a2a !important;
+  color: #e0e0e0 !important;
+  border-color: #555 !important;
+}
+
+/* icons that had a fixed color need to be lightened */
+body.dark-mode .offcanvasIcon,
+body.dark-mode .fa-ellipsis-vertical {
+  color: #ccc;
+}
+
+/* make search-bar inputs/select text bright when dark mode active */
+body.dark-mode searchBar input,
+body.dark-mode searchBar select {
+  color: #e0e0e0 !important;
+}
+
+/* Dark-mode form field overrides - always keep dark background during focus, value-entered, and autofill - do **not** override bootstrap invalid styles (red borders) */
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea,
+body.dark-mode .form-control,
+body.dark-mode .form-select {
+  background-color: #2a2a2a !important;
+  color: #e0e0e0 !important;
+}
+
+body.dark-mode input:focus:not(.is-invalid),
+body.dark-mode select:focus:not(.is-invalid),
+body.dark-mode textarea:focus:not(.is-invalid),
+body.dark-mode .form-control:focus:not(.is-invalid),
+body.dark-mode .form-select:focus:not(.is-invalid) {
+  background-color: #2a2a2a !important;
+  color: #e0e0e0 !important;
+  border-color: #777 !important; /* only when not invalid */
+}
+
+/* --------------------------------------------------------------------------
+   User Profile Page — Mobile thumbnail adjustments
+   Targets only the user profile page thumbnails (posts & liked tabs).
+   At widths <= 600px, shrink thumbnails to 120x160 and remove gaps.
+-------------------------------------------------------------------------- */
+/* Profile bio color — default for light mode; dark-mode override below */
+.user-bio {
+  color: #000; /* visible in light mode */
+}
+body.dark-mode .user-bio {
+  color: #e0e0e0 !important; /* keep readable in dark mode */
+}
+@media (max-width: 600px) {
+  .user-posts-grid,
+  .user-liked-grid {
+    gap: 1px !important;
+    margin-top: 0 !important;
+  }
+  .paddingContronlMobileScreen {
+    padding: 0 !important;
+  }
+  .hrMobileScreenMarginControl {
+    margin-bottom: 0 !important;
+  }
+  .user-post-thumb {
+    width: 119px !important;
+    height: 160px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .user-post-thumb img,
+  .user-post-thumb video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    border-radius: 0 !important;
+  }
+}
+
+body.dark-mode input:not(:placeholder-shown),
+body.dark-mode select:not(:placeholder-shown),
+body.dark-mode textarea:not(:placeholder-shown),
+body.dark-mode .form-control:not(:placeholder-shown),
+body.dark-mode .form-select:not(:placeholder-shown) {
+  background-color: #2a2a2a !important;
+}
+
+body.dark-mode input:-webkit-autofill,
+body.dark-mode input:-webkit-autofill:focus,
+body.dark-mode input:-webkit-autofill:hover,
+body.dark-mode input:-webkit-autofill:active,
+body.dark-mode textarea:-webkit-autofill,
+body.dark-mode textarea:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px #2a2a2a inset !important;
+  box-shadow: 0 0 0 30px #2a2a2a inset !important;
+  background-color: #2a2a2a !important;
+}
+
+/* oh yeah, search-bar still wants transparency in and out of dark mode */
+searchBar input,
+searchBar select {
+  background-color: transparent !important;
+}
+
+searchBar input:focus,
+searchBar select:focus,
+searchBar input:not(:placeholder-shown),
+searchBar select:not(:placeholder-shown) {
+  background-color: transparent !important;
+}
+
+searchBar input:-webkit-autofill,
+searchBar input:-webkit-autofill:focus,
+searchBar input:-webkit-autofill:hover,
+searchBar input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px transparent inset !important;
+  box-shadow: 0 0 0 30px transparent inset !important;
+  background-color: transparent !important;
+}
+
+/* General fix: prevent Bootstrap from switching backgrounds to white during focus/typing in any mode.  Keep whatever color was already set. */
+.form-control:focus,
+.form-select:focus,
+input:focus,
+textarea:focus {
+  background-color: inherit !important;
+}
+
+/* and make autofill behave too (otherwise Chrome paints yellow/white) */
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px inherit inset !important;
+  box-shadow: 0 0 0 30px inherit inset !important;
+  background-color: inherit !important;
+}
+
+/* override some bootstrap utility classes that might force light backgrounds */
+body.dark-mode .bg-white,
+body.dark-mode .bg-light {
+  background-color: transparent !important;
+}
+/* comprehensive dark-mode input/select/textarea rules */
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea,
+body.dark-mode .form-control,
+body.dark-mode .form-select {
+  background-color: #2a2a2a !important;
+  color: #e0e0e0 !important;
+}
+
+body.dark-mode input:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus,
+body.dark-mode .form-control:focus,
+body.dark-mode .form-select:focus {
+  background-color: #2a2a2a !important;
+  color: #e0e0e0 !important;
+  border-color: #777 !important;
+}
+
+/* placeholder text should remain visible and subdued in dark mode */
+body.dark-mode input::placeholder,
+body.dark-mode select::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #aaa !important;
+  opacity: 1; /* ensure full opacity */
+}
+
+/* autofill adjustments to keep text readable */
+body.dark-mode input:-webkit-autofill,
+body.dark-mode input:-webkit-autofill:focus,
+body.dark-mode textarea:-webkit-autofill,
+body.dark-mode textarea:-webkit-autofill:focus,
+body.dark-mode select:-webkit-autofill,
+body.dark-mode select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #e0e0e0 !important;
+  background-color: #2a2a2a !important;
+}
+/* ensure links inside alerts are visible */
+body.dark-mode .flash-alert a {
+  color: #aad;
+}
+
+/* borders in dark mode */
+body.dark-mode .border,
+body.dark-mode .border-secondary {
+  border-color: #666 !important;
+}
+
+body.dark-mode .subjectCard {
+  border-color: #666;
+}
+
+/* footer */
+body.dark-mode footer {
+  /* inline styles on the <footer> element should no longer win; enforce with !important */
+  background-color: #333 !important;
+  color: #e0e0e0;
+}
+
+/* links in footer stay blue even in dark mode */
+body.dark-mode footer a {
+  color: #0d6efd !important;
+}
+
+body.dark-mode footer a:hover {
+  color: #0a58ca !important;
+}
+
+body.dark-mode .text-black {
+  color: #e0e0e0 !important;
+}
+
+/* ensure bootstrap utility text-dark also becomes light in dark mode */
+body.dark-mode .text-dark {
+  color: #e0e0e0 !important;
+}
+
+/* icons inside subject cards should inherit the card's color */
+body.dark-mode .subjectCard i {
+  color: inherit !important;
+}
+
+body.dark-mode .text-decoration-none {
+  color: inherit;
+}
+
+/* onto the next section, you can add more overrides as needed */ /* make the navbar toggler (hamburger) and offcanvas close button visible in dark mode */
+body.dark-mode .navbar-toggler-icon,
+body.dark-mode .btn-close {
+  filter: invert(1) brightness(2);
+}
+
+/* ensure list groups inside offcanvas follow dark theme */
+body.dark-mode .offcanvas .list-group,
+body.dark-mode .offcanvas .list-group-flush {
+  background-color: #1f1f1f;
+}
+
+body.dark-mode .offcanvas .list-group-item {
+  background-color: #1f1f1f;
+  color: #e0e0e0;
+}
+
+body.dark-mode .offcanvas .list-group-item.active {
+  background-color: #333 !important;
+  color: #fff;
+}
+
+/* offcanvas links already styled earlier but ensure they stay light */
+body.dark-mode .offcanvas_anchorTags {
+  color: #e0e0e0 !important;
+}
+
+/* theme toggle spin animation */
+.theme-toggle-spin {
+  animation: spin 0.5s ease-in-out;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+input {
+  background-color: transparent;
+}
+
+/* Side panel + main panel independent scrolling */
+.sidePanel {
+  flex: 0 0 220px; /* fixed width */
+  width: 220px;
+  height: 100%;
+  overflow-y: auto; /* allow side panel to scroll independently */
+  -webkit-overflow-scrolling: touch;
+}
+.mainScreen {
+  overflow-y: auto; /* main area scrolls separately */
+}
+
+/* Ensure active link color in dark mode (icon + text) matches light-mode danger color */
+body.dark-mode .nav-link.active:not(.no-active-color),
+body.dark-mode .nav-link.active:not(.no-active-color) i,
+body.dark-mode .nav-link.active:not(.no-active-color) .fw-semibold {
+  color: #fe424d !important;
+}
+
+/* Also ensure offcanvas active text/icon follows danger color when dark mode is active */
+body.dark-mode .offcanvas_anchorTags.active,
+body.dark-mode .offcanvas_anchorTags.active .offcanvasIcon {
+  color: #fe424d !important;
+}
+
+/* Hide native scrollbars but keep scrolling functional for a cleaner UI */
+.sidePanel,
+.mainScreen {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Comments bottom-sheet dark mode overrides */
+body.dark-mode #comments-backdrop {
+  background: rgba(0, 0, 0, 0.65) !important;
+}
+body.dark-mode #comments-sheet {
+  background: #0f0f10 !important;
+  color: #e6e6e6 !important;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+body.dark-mode #comments-sheet .sheet-header {
+  background: transparent;
+  color: #e6e6e6 !important;
+  border-bottom: 1px solid #222 !important;
+}
+body.dark-mode #comments-sheet .sheet-body {
+  background: transparent;
+  color: #e6e6e6 !important;
+}
+body.dark-mode .comment-item {
+  border-bottom-color: #222 !important;
+}
+body.dark-mode #close-comments {
+  color: #e6e6e6 !important;
+  background: transparent;
+  border: none;
+}
+body.dark-mode #comments-sheet .sheet-footer form input[type="text"] {
+  background: #171717 !important;
+  color: #e6e6e6 !important;
+  border-color: #333 !important;
+}
+body.dark-mode #comments-sheet .sheet-footer form button {
+  background: #ff6b6b !important;
+  color: #0f0f10 !important;
+}
+
+.sidePanel::-webkit-scrollbar,
+.mainScreen::-webkit-scrollbar {
+  width: 0; /* Chrome, Safari */
+  height: 0;
+}
+
+/* Auth modal (overlay) */
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 3000;
+}
+.auth-modal.d-none {
+  display: none;
+}
+.auth-modal-card {
+  background: #fff;
+  border-radius: 8px;
+  max-width: 420px;
+  width: 92%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  position: relative;
+}
+.auth-modal-card .btn-close.auth-modal-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+@media (max-width: 991px) {
+  /* On smaller screens, if modal is accidentally used, make it full-screen friendly */
+  .auth-modal-card {
+    height: 100vh;
+    width: 100%;
+    border-radius: 0;
+    max-width: none;
+    overflow-y: auto;
+  }
+}
+
+body.dark-mode .auth-modal-card {
+  background: #1f1f1f;
+  color: #e0e0e0;
+}
+
+/* Hide side panel on small screens (mobile). When viewport <= 600px, side panel is hidden and main area fills width. */
+@media (max-width: 600px) {
+  .sidePanel {
+    display: none;
+  }
+  .mainScreen {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+  /* ensure auth modal is full-screen friendly on very small devices */
+  .auth-modal-card {
+    height: 100vh;
+    width: 100%;
+    border-radius: 0;
+    max-width: none;
+  }
+}
+
+/* Full-screen feed behavior similar to TikTok */
+.feed-container {
+  height: 100vh;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide native scrollbar but keep scrolling usable */
+.feed-container::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+.feed-container {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.posts {
+  margin: 0;
+  padding: 0;
+}
+
+.post {
+  scroll-snap-align: start;
+  height: 100vh;
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+  box-sizing: border-box;
+}
+
+.post-content {
+  width: 400px;
+  max-width: 90vw;
+  height: 85vh;
+  overflow: hidden;
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.media video,
+.media img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Responsive: when viewport <= 600px, make feed behave like TikTok
+   - Stack post content vertically
+   - Make .funtionalies smaller and overlay on right side of the media
+*/
+@media (max-width: 600px) {
+  .post {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    height: 100vh;
+    align-items: stretch;
+    justify-content: center;
+    position: relative;
+  }
+
+  .post-content {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative; /* needed for absolute-positioned .funtionalies */
+    overflow: hidden;
+    z-index: 1000;
+  }
+
+  .media {
+    width: 100%;
+    height: 100vh;
+  }
+
+  .media video,
+  .media img {
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+    border-radius: 0;
+  }
+
+  /* Functionalities (like/comment/owner controls) overlay on the right */
+  .funtionalies {
+    position: absolute;
+    top: 50%;
+    right: 2px;
+    transform: translateY(-50%);
+    z-index: 1900;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    padding: 4px;
+    pointer-events: auto;
+  }
+
+  /* make icons slightly smaller on mobile */
+  .funtionalies .mainPageFunctionalitiesIcons,
+  .funtionalies .mainPageFunctionalitiesIcons.btn {
+    width: 40px;
+    height: 40px;
+    font-size: 17px !important;
+  }
+
+  /* keep counts readable over video */
+  .funtionalies .like-count,
+  .funtionalies .comment-count {
+    font-size: 12px;
+    color: white;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Post caption and user name sit on bottom-left over media */
+  .post-info {
+    position: absolute;
+    left: 12px;
+    bottom: 18px;
+    z-index: 2100;
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+    max-width: 70%;
+  }
+
+  /* Slightly shrink profile picture inside the overlay area */
+  .funtionalies img {
+    width: 36px !important;
+    height: 36px !important;
+    object-fit: cover;
+  }
+}
+
+/* Bottom-sheet comments panel */
+#comments-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 220ms ease, visibility 220ms;
+  z-index: 1999;
+  pointer-events: none;
+}
+#comments-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+#comments-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 70vh;
+  background: #fff;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2);
+  transform: translateY(100%);
+  transition: transform 300ms cubic-bezier(0.22, 0.9, 0.2, 1);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  touch-action: none;
+}
+#comments-sheet.active {
+  transform: translateY(0);
+}
+#comments-sheet .sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eee;
+}
+#comments-sheet .sheet-body {
+  padding: 10px 14px;
+  overflow: auto;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+.comment-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+/* sheet footer (comment input) */
+#comments-sheet .sheet-footer {
+  border-top: 1px solid #eee;
+  background: transparent;
+}
+#comments-sheet .sheet-body {
+  padding-bottom: 72px;
+}
+#comments-sheet .sheet-footer form input[type="text"] {
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  background: #fff;
+  color: #222;
+}
+#comments-sheet .sheet-footer form button {
+  border-radius: 20px;
+  background: #fe424d;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+}
+
+.tab {
+  display: none;
+}
+.tab.active {
+  display: block;
+}
+.tab-button {
+  background: transparent;
+  border: none;
+  padding: 6px 12px;
+}
+.tab-button:focus {
+  outline: none;
+}
+.tab-button.active {
+  border-bottom: 3px solid #dc3545;
+}
+
+/* Mobile-specific helpers (default states) */
+.mobile-menu-toggle {
+  display: none !important;
+  border: none;
+  background: transparent !important;
+  color: inherit !important;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+.hide-on-mobile {
+  display: inline-block !important;
+}
+.edit-inline-mobile {
+  display: none !important;
+}
+
+/* Responsive adjustments for user profile on small screens (<=600px) */
+@media (max-width: 600px) {
+  /* Target the profile header inside the page container and stack vertically */
+  .container > .d-flex.align-items-center.gap-3.mb-3 {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    text-align: center;
+  }
+
+  /* make the image wrapper relative so we can reposition the edit icon */
+  .container > .d-flex.align-items-center.gap-3.mb-3 > .d-flex {
+    position: relative !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  /* shrink profile picture to 100x100 (override inline styles) */
+  .container
+    > .d-flex.align-items-center.gap-3.mb-3
+    > .d-flex
+    img.rounded-circle {
+    width: 100px !important;
+    height: 100px !important;
+    object-fit: cover !important;
+  }
+
+  /* reposition pencil/edit icon to top-right of the image */
+  .container > .d-flex.align-items-center.gap-3.mb-3 > .d-flex a {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none !important;
+  }
+
+  .editingPositionOnMibileScreens {
+    position: absolute !important;
+    right: -10px !important;
+    top: 15px !important;
+  }
+
+  .container
+    > .d-flex.align-items-center.gap-3.mb-3
+    > .d-flex
+    a
+    .fa-solid.fa-pencil {
+    position: static !important;
+    right: auto !important;
+    top: auto !important;
+  }
+
+  /* Stack name and username vertically and center them */
+  .container
+    > .d-flex.align-items-center.gap-3.mb-3
+    .d-flex.flex-column
+    > .d-flex.align-items-end {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.125rem !important;
+  }
+
+  /* hide the decorative separator '|' inside the h3 on small screens */
+  .container > .d-flex.align-items-center.gap-3.mb-3 h3 > span {
+    display: none !important;
+  }
+
+  .container > .d-flex.align-items-center.gap-3.mb-3 h3,
+  .container > .d-flex.align-items-center.gap-3.mb-3 h5 {
+    margin: 0 !important;
+  }
+
+  .container > .d-flex.align-items-center.gap-3.mb-3 h3 {
+    font-size: 1.25rem !important;
+    line-height: 1.1 !important;
+  }
+  .container > .d-flex.align-items-center.gap-3.mb-3 h5 {
+    font-size: 14px !important;
+    margin-top: 0.125rem !important;
+    margin-left: 4px !important;
+  }
+
+  /* Center stats (followers/following/likes) */
+  .container
+    > .d-flex.align-items-center.gap-3.mb-3
+    > .d-flex.flex-column
+    > div:nth-of-type(2) {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 0.75rem !important;
+    flex-wrap: wrap !important;
+  }
+
+  /* Center edit/follow button row */
+  .container > .d-flex.align-items-center.gap-3.mb-3 .my-1 {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    flex-wrap: wrap !important;
+  }
+
+  .container > .d-flex.align-items-center.gap-3.mb-3 .my-1 .btn {
+    font-size: 0.95rem !important;
+    padding: 0.35rem 0.8rem !important;
+  }
+
+  /* Ensure bio text wraps and stays centered */
+  .container > .d-flex.align-items-center.gap-3.mb-3 p.mb-0 {
+    text-align: center !important;
+    max-width: 92% !important;
+    margin: 0 auto !important;
+  }
+
+  /* Position the offcanvas toggle (three-line Menu) to top-right of the profile area */
+  .container {
+    position: relative; /* allow absolute positioning of the button inside */
+  }
+  .mobile-menu-toggle {
+    display: inline-flex !important;
+    position: absolute !important;
+    /* top: 10px !important; */
+    right: 12px !important;
+    z-index: 999 !important; /* make sure it's clickable */
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 0.35rem 0.6rem !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+    border: none !important;
+  }
+
+  /* Offcanvas should cover up to 75% from the right and sit above everything */
+  .offcanvas.offcanvas-end {
+    width: 75vw !important;
+    max-width: 75vw !important;
+    z-index: 99998 !important;
+  }
+  /* Desktop edit button hidden on mobile; show inline edit next to name */
+  .hide-on-mobile {
+    display: none !important;
+  }
+  .edit-inline-mobile {
+    display: inline-flex !important;
+    margin-left: 0.5rem !important;
+  }
+  /* ensure the name block spacing remains readable */
+  .container
+    > .d-flex.align-items-center.gap-3.mb-3
+    .d-flex.flex-column
+    > .d-flex.align-items-end
+    h5 {
+    margin-top: 0.15rem !important;
+  }
+}
+
+/* Mobile menu icon color + desktop name layout adjustments */
+.mobile-menu-toggle i.fa-bars {
+  color: #222 !important; /* dark icon by default (light mode)
+                            but allow body.dark-mode to override */
+  font-size: 1.4rem !important;
+}
+body.dark-mode .mobile-menu-toggle i.fa-bars {
+  color: #fff !important;
+}
+
+@media (min-width: 992px) {
+  .name-row {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+  }
+  .name-row h3,
+  .name-row h5 {
+    margin: 0 !important;
+  }
+  .name-row h5 {
+    color: #ffffff99;
+    font-size: 1rem;
+  }
+  .name-row .name-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+/* Hide/disable the search close (cross) button on wider screens (>600px) */
+@media (min-width: 601px) {
+  .search-close {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .aligningInColomnOnMobileScreens {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    align-items: center !important;
+    gap: 0.1rem !important;
+  }
+}

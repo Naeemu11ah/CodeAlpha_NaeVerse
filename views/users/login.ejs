@@ -1,0 +1,53 @@
+<%- layout("/layout/boilerplate") %>
+<body>
+  <div class="outermostDiv">
+    <div style="width: 300px">
+      <h2 class="mb-3 text-center fw-bold">Log in</h2>
+      <form method="post" action="/login" class="needs-validation" novalidate>
+        <input type="hidden" name="next" value="<%= typeof next !== 'undefined' ? next : '' %>" />
+        <input type="hidden" name="nextFollowing" value="<%= typeof nextFollowing !== 'undefined' ? nextFollowing : '' %>" />
+        <div class="mb-2">
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            placeholder="Enter username"
+            name="username"
+            required
+          />
+        </div>
+        <div class="mb-2">
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            placeholder="Enter password"
+            name="password"
+            minlength="8"
+            required
+          />
+          <div class="invalid-feedback">
+            Password should be at least 8 characters!
+          </div>
+        </div>
+        <div class="form-check">
+          <input
+            class="form-check-input show-password show-password-mobile"
+            type="checkbox"
+            id="showPassword"
+          />
+          <label class="form-check-label" for="showPassword"
+            >Show password</label
+          >
+        </div>
+        <button type="submit" class="btn btn-danger w-100 my-2">Log in</button>
+      </form>
+      <p>
+        Don't have an account?
+        <a style="text-decoration: none" href="./signup">Sign up</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="/js/showPassswordCheckbox.js"></script>
+</body>

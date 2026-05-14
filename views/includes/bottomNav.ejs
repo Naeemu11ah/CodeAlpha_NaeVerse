@@ -1,0 +1,61 @@
+<!--bottom panel for mobile screens-->
+<% function isActive(prefix) { if (!currentPath) return ""; return
+currentPath.startsWith(prefix) ? "active" : ""; } %>
+
+<div
+  class="bottom-nav d-flex align-items-center justify-content-between px-4 py-2"
+  style="
+  border-top: 1px solid #ffffff1f;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0px;
+    z-index: 1900;
+    background: rgb(20, 18, 18);
+    width: 100%;
+    max-width: 600px;
+  "
+>
+  <a
+    class="nav-link d-inline text-decoration-none <%= isActive('/post') %>"
+    href="/post"
+  >
+    <div class="d-flex flex-column align-items-center gap-1">
+      <i class="fa-solid fa-house text-secondary" style="font-size: 20px"></i>
+      <span
+        class="fw-semibold text-secondary"
+        style="font-size: 12px; line-height: 1"
+        >Home</span
+      >
+    </div>
+  </a>
+  <a class="nav-link d-inline no-active-color" href="/post/new">
+    <div
+      class="d-flex flex-column align-items-center rounded-3"
+      style="
+        background-color: white !important;
+        border-right: 4px solid red !important;
+        border-left: 4px solid rgb(87, 87, 255) !important;
+        padding: 6px 10px;
+      "
+    >
+      <i
+        class="fa-solid fa-plus fw-semibold"
+        style="font-size: 17px; color: black !important"
+      ></i>
+    </div>
+  </a>
+  <a
+    class="nav-link d-inline text-decoration-none <%= isActive('/user/profile') %>"
+    href="<%= currentUser ? ('/user/profile/' + currentUser._id) : '/login' %>"
+  >
+    <div class="d-flex flex-column align-items-center gap-1">
+      <i class="fa-solid fa-user text-secondary" style="font-size: 21px"></i>
+      <span
+        class="fw-semibold text-secondary"
+        style="font-size: 12px; line-height: 1"
+        >Profile</span
+      >
+    </div>
+  </a>
+</div>

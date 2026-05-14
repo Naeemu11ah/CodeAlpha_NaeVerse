@@ -1,0 +1,69 @@
+<%- layout("/layout/boilerplate") %>
+<body>
+  <div class="outermostDiv">
+    <div style="width: 300px" class="border p-2 rounded-3 border-secondary">
+      <h3 class="text-center">Select<span style="color: red"> media</span></h3>
+      <form
+        method="post"
+        action="/post/new"
+        class="needs-validation"
+        novalidate
+        enctype="multipart/form-data"
+      >
+        <div>
+          <div>
+            <div class="d-flex justify-content-center my-3">
+              <input
+                type="file"
+                id="fileInput"
+                name="page1"
+                class="d-none"
+                accept="image/*,video/*"
+                multiple
+                required
+              />
+              <label
+                for="fileInput"
+                id="fileLabel"
+                class="border borderd-2 border-secondary rounded-3 d-flex justify-content-center align-items-center position-relative overflow-hidden"
+                tabindex="0"
+                style="width: 140px; height: 150px; cursor: pointer"
+              >
+                <span id="plusIcon" class="fs-1 text-secondary">+</span>
+                <img
+                  id="previewImage"
+                  class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover d-none"
+                />
+                <div
+                  id="fileInvalidFeedback"
+                  class="invalid-feedback d-none text-center"
+                  style="position: absolute; bottom: 6px; left: 6px; right: 6px"
+                >
+                  Please select an image or video.
+                </div>
+              </label>
+            </div>
+          </div>
+          <textarea
+            type="text"
+            class="form-control"
+            style="border: none !important"
+            placeholder="Add caption..."
+            id="caption"
+            name="caption"
+            maxlength="120"
+          ></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-danger w-100 mt-2">Upload</button>
+      </form>
+    </div>
+  </div>
+  <style>
+    .is-invalid-border {
+      border-color: #dc3545 !important;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+  </style>
+  <script src="/js/showSecondImadeField.js"></script>
+</body>

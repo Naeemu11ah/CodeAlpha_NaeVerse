@@ -1,0 +1,310 @@
+<%- layout('/layout/boilerplate') %>
+<body>
+  <div class="container my-4 p-0">
+    <% 
+      const current = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : (request && request.user ? request.user : null);
+      const isOwnProfile = current && String(current._id) === String(user._id);
+      const isFollowing = current && current.following && current.following.some(id => String(id) === String(user._id));
+    %>
+    <!--offcanvas button-->
+    <button
+      class="mobile-menu-toggle"
+      type="button"
+      style="background-color: none !important"
+      data-bs-toggle="offcanvas"
+      data-bs-target="#mobileMenu"
+      aria-controls="mobileMenu"
+      aria-label="Open menu"
+    >
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <!-- profile section -->
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <div class="d-flex">
+        <img
+          src="<%= profilePicSrc %>"
+          alt="profile picture"
+          class="rounded-circle border"
+          style="width: 172px; height: 172px; object-fit: cover"
+        />
+        <a href="/user/profile/<%= user._id %>/editProfilePic" class="editingPositionOnMibileScreens">
+          <i
+            class="fa-solid fa-pencil fs-5"
+            style="position: relative; color: red; right: 20px; top: 35px"
+          ></i>
+        </a>
+      </div>
+      <div class="d-flex flex-column gap-1">
+        <!-- name and username -->
+        <div class="name-row d-flex flex-column align-items-center">
+          <div class="d-flex align-items-center name-edit-row aligningInColomnOnMobileScreens">
+            <h3 class="m-0">
+              <%= user.name%><span class="mx-3 fs-4" style="color: #ffffff1f"
+                >|</span
+              >
+            </h3>
+            <h5 class="m-0" style="color: #ffffff99"><%=user.username %></h5>
+          </div>
+        </div>
+        <!-- following, following and likes-->
+        <div>
+          <span class="me-3"
+            ><strong><%= user.followers.length %></strong> followers</span
+          >
+          <span class="me-3"
+            ><strong><%= user.following.length %></strong> following</span
+          >
+          <% let totalLikes = 0; if (posts && posts.length) {
+          posts.forEach(function(p) { totalLikes += (p.likes && p.likes.length)
+          || 0; }); } %>
+          <span><strong><%= totalLikes %></strong> likes</span>
+        </div>
+        <!-- edit and follow profile -->
+        <div class="my-1">
+          <% if (isOwnProfile) { %>
+          <a
+            href="/user/profile/<%= user._id %>/edit"
+            class="btn btn-secondary me-2"
+            style="border-radius: 50px !important"
+          >
+            Edit Profile
+          </a>
+          <% } %> <% if (!isOwnProfile) { %>
+          <button
+            id="followBtn"
+            data-user-id="<%= user._id %>"
+            class="btn <%= isFollowing ? 'btn-outline-danger' : 'btn-danger' %>"
+            style="border-radius: 50px !important"
+          >
+            <%= isFollowing ? 'Unfollow' : 'Follow' %>
+          </button>
+          <% } %>
+        </div>
+        <!-- bio -->
+        <div>
+          <p class="mb-0 user-bio"><%= user.bio %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- posts section -->
+    <div class="mt-4">
+      <div>
+        <!--  tab buttons -->
+        <div class="d-flex justify-content-start align-content-end gap-2 mt-3">
+          <button
+            class="tab-button"
+            data-tab="posts"
+            onclick="showTab('posts', this)"
+          >
+            <span class="fw-semibold" style="font-size: 18px">Posts</span>
+          </button>
+          <button
+            class="tab-button"
+            data-tab="liked"
+            onclick="showTab('liked', this)"
+          >
+            <span class="fw-semibold" style="font-size: 18px">Liked</span>
+          </button>
+        </div>
+        <hr class="mt-0 hrMobileScreenMarginControl" />
+
+        <!-- Displaying uploaded posts tab-->
+        <div id="posts" class="tab">
+          <% if (!posts || posts.length === 0) { %>
+          <div class="d-flex alaign-items-center justify-content-center">
+            <p
+              class="text-secondary p-2 border border-danger rounded-3 text-center"
+              style="max-width: 500px"
+            >
+              <%= user.name%> has not added any post.
+            </p>
+          </div>
+          <% } else { %>
+          <div class="d-flex gap-3 mt-3 flex-wrap justify-content-start user-posts-grid">
+            <% posts.forEach((post) => { %>
+            <a
+              href="/post/<%= post._id %>?list=posts&listOwner=<%= user._id %>"
+              class="text-decoration-none text-black"
+            >
+              <div class="text-center user-post-thumb" style="width: 160px">
+                <% const mediaObj = post.media && post.media.length ?
+                post.media[0] : null; %> <% const mediaUrl = mediaObj ?
+                mediaObj.url : null; %> <% const mediaType = mediaObj ?
+                mediaObj.mediaType : null; %> <% const mediaSrc = mediaUrl ?
+                (mediaUrl.indexOf('http') === 0 ? mediaUrl : '/' + mediaUrl) :
+                '/assets/userProfilePic.png'; %> <% if (mediaType === 'video') {
+                %>
+                <video
+                  class="rounded-2"
+                  style="
+                    width: 100%;
+                    height: 215px;
+                    object-fit: cover;
+                    border-radius: 8px;
+                    background: #000;
+                  "
+                >
+                  <source src="<%= mediaSrc %>" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+                <% } else { %>
+                <img
+                  src="<%= mediaSrc %>"
+                  class="rounded-2"
+                  style="width: 100%; height: 215px; object-fit: cover"
+                  alt="uploaded_post"
+                />
+                <% } %>
+              </div>
+            </a>
+            <% })%>
+          </div>
+          <% } %>
+        </div>
+
+        <!-- Displaying liked posts -->
+        <div id="liked" class="tab">
+          <% if (!likedPosts || likedPosts.length === 0) { %>
+          <div class="d-flex alaign-items-center justify-content-center">
+            <p
+              class="text-secondary p-2 border border-danger rounded-3 text-center"
+              style="max-width: 500px"
+            >
+              <%= user.name%> has not liked any post.
+            </p>
+          </div>
+          <% } else { %>
+          <div class="d-flex gap-3 mt-3 flex-wrap justify-content-start user-liked-grid">
+            <% (likedPosts || []).forEach((post) => { %>
+            <a
+              href="/post/<%= post._id %>?list=liked&listOwner=<%= user._id %>"
+              class="text-decoration-none text-black"
+            >
+              <div
+                class="text-center user-post-thumb"
+                style="width: 160px; height: 215px; overflow: hidden"
+              >
+                <% const lmediaObj = post.media && post.media.length ?
+                post.media[0] : null; %> <% const lmedia = lmediaObj ?
+                lmediaObj.url : null; %> <% const ltype = lmediaObj ?
+                lmediaObj.mediaType : null; %> <% const lsrc = lmedia ?
+                (lmedia.indexOf('http') === 0 ? lmedia : '/' + lmedia) :
+                '/assets/userProfilePic.png'; %> <% if (ltype === 'video') { %>
+                <video
+                  class="rounded-2"
+                  style="
+                    width: 100%;
+                    height: 215px;
+                    object-fit: cover;
+                    background: #000;
+                  "
+                >
+                  <source src="<%= lsrc %>" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+                <% } else { %>
+                <img
+                  src="<%= lsrc %>"
+                  class="rounded-2"
+                  style="width: 100%; height: 215px; object-fit: cover"
+                  alt="liked_post"
+                />
+                <% } %>
+              </div>
+            </a>
+            <% })%>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <%- include("../includes/offcanvas") %>
+</body>
+<script>
+  (function () {
+    // expose current user to client scripts so follow state can persist client-side
+    window.currentUser = <%- JSON.stringify(current || null) %>;
+    document.addEventListener("DOMContentLoaded", function () {
+      var btn = document.getElementById("followBtn");
+      if (btn) {
+        btn.addEventListener("click", async function (e) {
+          e.preventDefault();
+          var targetId = btn.getAttribute("data-user-id");
+          try {
+            var resp = await fetch("/user/" + targetId + "/follow", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "same-origin",
+            });
+            if (!resp.ok) {
+              var err = await resp.json().catch(function () {
+                return { error: "Request failed" };
+              });
+              alert(err && err.error ? err.error : "Action failed");
+              return;
+            }
+            var data = await resp.json();
+            if (data.status === "followed") {
+              btn.textContent = "Unfollow";
+              btn.classList.remove("btn-danger");
+              btn.classList.add("btn-outline-danger");
+              try {
+                window.currentUser = window.currentUser || {};
+                window.currentUser.following = window.currentUser.following || [];
+                if (!window.currentUser.following.some(function (f) { return String(f) === String(targetId); })) {
+                  window.currentUser.following.push(targetId);
+                }
+              } catch (e) {}
+            } else if (data.status === "unfollowed") {
+              btn.textContent = "Follow";
+              btn.classList.remove("btn-outline-danger");
+              btn.classList.add("btn-danger");
+              try {
+                if (window.currentUser && window.currentUser.following) {
+                  window.currentUser.following = window.currentUser.following.filter(function (f) {
+                    return String(f) !== String(targetId);
+                  });
+                }
+              } catch (e) {}
+            }
+          } catch (err) {
+            console.error(err);
+            alert("Please Login to continue.");
+          }
+        });
+      }
+
+      // Tabs logic
+      function showTab(name, btn) {
+        document.querySelectorAll(".tab").forEach(function (t) {
+          t.classList.remove("active");
+          t.style.display = "none";
+        });
+        var el = document.getElementById(name);
+        if (el) {
+          el.classList.add("active");
+          el.style.display = "block";
+        }
+        document.querySelectorAll(".tab-button").forEach(function (b) {
+          b.classList.remove("active");
+        });
+        if (btn && btn.classList) btn.classList.add("active");
+      }
+
+      // Expose showTab to inline onclick handlers
+      window.showTab = showTab;
+
+      // Initialize tabs: use hash if present, otherwise default to 'posts'
+      var hash = window.location.hash
+        ? window.location.hash.replace("#", "")
+        : null;
+      var initial = hash && document.getElementById(hash) ? hash : "posts";
+      var initialBtn = document.querySelector(
+        '.tab-button[data-tab="' + initial + '"]',
+      );
+      showTab(initial, initialBtn);
+    });
+  })();
+</script>

@@ -1,0 +1,25 @@
+<searchBar class="d-flex justify-content-center align-items-center">
+  <form
+    role="search"
+    method="get"
+    action="/search"
+    style="max-width: 420px"
+    class="d-flex gap-2 align-content-center justify-content-between border border-secondary ps-3 rounded-5"
+  >
+    <div class="d-flex align-content-center">
+      <i
+        class="fa-solid fa-magnifying-glass align-content-center text-secondary"
+      ></i>
+      <input
+        class="form-control border-0 shadow-none"
+        style="background-color: transparent !important"
+        type="search"
+        placeholder="Search"
+        aria-label="Search"
+        name="searchedQuery"
+        value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
+        required
+      />
+    </div>
+  </form>
+</searchBar>

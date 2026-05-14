@@ -1,0 +1,128 @@
+<%
+function isActiveExact(path) {
+  if (!currentPath) return "";
+  return currentPath === path ? "active" : "";
+}
+
+function isActiveStartsWith(prefix) {
+  if (!currentPath) return "";
+  return currentPath === prefix || currentPath.startsWith(prefix + "/") ? "active" : "";
+}
+
+function isActiveRegex(re) {
+  if (!currentPath) return "";
+  return re.test(currentPath) ? "active" : "";
+}
+%>
+
+<nav class="navbar navbar-expand-md bg-body-tertiary sticky-top p-0">
+  <div class="d-flex flex-column gap-3 p-3 bg-white" style="width: 220px">
+    <a class="navbar-brand d-flex align-items-center" href="/post"
+      ><img
+        src="/assets/favicon.ico"
+        alt="logo"
+        style="width: 40px; height: 40px"
+      /><span class="fw-bold fs-4">NaeVerse</span></a
+    >
+
+    <%- include("../includes/searchBar") %>
+
+    <a class="nav-link d-inline <%= isActiveExact('/post') %>" href="/post"
+      ><div class="d-flex gap-3 align-content-center">
+        <i class="fa-solid fa-house" style="font-size: 19px"></i
+        ><span class="fw-semibold">For You</span>
+      </div></a
+    >
+
+      <a
+        class="nav-link d-inline <%= isActiveRegex(/^\/user\/[^\/]+\/following$/) %>"
+        href="<%= currentUser ? ('/user/' + currentUser._id + '/following') : '/login?nextFollowing=1' %>"
+        <%= !currentUser ? 'onclick="alert(\'Please login first to continue\')"' : '' %>
+        ><div class="d-flex gap-3 align-content-center">
+          <i class="fa-solid fa-people-group" style="font-size: 19px"></i
+          ><span class="fw-semibold">Following</span>
+        </div></a
+      >
+    <a class="nav-link d-inline <%= isActiveRegex(/^\/user\/profile\/[^\/]+$/) %>"
+      href="<%= currentUser ? ('/user/profile/' + currentUser._id) : '/login' %>"
+    >
+      <div class="d-flex gap-3 align-content-center">
+        <% let profilePicSrc = '/assets/userProfilePic.png'; if (currentUser &&
+        currentUser.profilePic) { const pp = currentUser.profilePic; const url =
+        (typeof pp === 'string') ? pp : (pp && pp.url ? pp.url : null); if (url)
+        { profilePicSrc = /^https?:\/\//i.test(url) || url.startsWith('/') ? url
+        : '/' + url; } } %>
+        <img
+          src="<%= profilePicSrc %>"
+          alt="userProfilePicture"
+          class="rounded-circle"
+          style="width: 25px; height: 25px; object-fit: cover"
+        />
+        <span class="fw-semibold">Profile</span>
+      </div>
+    </a>
+    <a class="nav-link d-inline no-active-color" href="/post/new"
+      ><div class="d-flex gap-3 align-content-center">
+        <i class="fa-regular fa-square-plus" style="font-size: 19px"></i
+        ><span class="fw-semibold">Upload</span>
+      </div></a
+    >
+    <hr />
+    <button
+      id="theme-toggle"
+      class="btn-link nav-link d-flex gap-3"
+      title="Toggle theme"
+    >
+      <i id="theme-icon" class="fa-solid"></i>
+      <span id="theme-text">Theme</span>
+    </button>
+
+    <% if (currentUser) { %>
+    <a class="nav-link d-inline" href="/logout"
+      ><div class="d-flex gap-3 align-content-center">
+        <i class="fa-solid fa-up-right-from-square" style="font-size: 19px"></i
+        ><span class="fw-semibold">Log out</span>
+      </div></a
+    >
+    <form action="/user/<%= currentUser._id %>/delete?__method=DELETE"
+      class="nav-link d-inline"
+      method="post"
+      onsubmit="return confirm('Are you sure you want to delete your account?')"
+    >
+      <button
+        type="submit"
+        style="border: none !important ; color: rgb(161, 27, 27);"
+        class="d-flex p-0 bg-transparent gap-3 align-content-center"
+      >
+        <i class="fa-solid fa-trash-can" style="font-size: 19px"></i
+        ><span class="fw-semibold">Delete account</span>
+      </button>
+    </form>
+
+    <%}%> <% if (!currentUser) { %>
+    <a class="nav-link d-inline <%= isActiveExact('/login') %>" href="/login"
+      ><div class="d-flex gap-3 align-content-center">
+        <i class="fa-solid fa-right-to-bracket" style="font-size: 19px"></i
+        ><span class="fw-semibold">Log in</span>
+      </div></a
+    >
+    <a class="nav-link d-inline <%= isActiveExact('/signup') %>" href="/signup"
+      ><div class="d-flex gap-3 align-content-center">
+        <i class="fa-solid fa-user-plus" style="font-size: 19px"></i
+        ><span class="fw-semibold">Sign up</span>
+      </div></a
+    >
+    <% } %>
+    <hr />
+    <a class="nav-link d-inline" href="/about">
+      <span class="text-secondary fw-semibold">About us</span>
+    </a>
+    <a class="nav-link d-inline" href="/terms">
+      <span class="text-secondary fw-semibold">Terms & conditions</span>
+    </a>
+    <a class="nav-link d-inline" href="/privacy">
+      <span class="text-secondary fw-semibold">Policy & privacy</span>
+    </a>
+    <span class="text-secondary fw-semibold">&copy; 2026 NaeVerse</span>
+  </div>
+</nav>

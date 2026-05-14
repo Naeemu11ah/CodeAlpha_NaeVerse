@@ -1,0 +1,365 @@
+<% layout("/layout/boilerplate") %>
+<% function isActive(prefix) { if (!currentPath) return ""; return currentPath.startsWith(prefix) ? "active" : ""; } %>
+<body>
+  <div class="container feed-container" style="padding: 0 !important;">
+    <div class="posts">
+      <!-- top panel for mobile screens -->
+      <div class="top-mobile-tabs position-absolute d-flex align-items-center justify-content-center gap-3 mt-3">
+        <%- include("../includes/searchBar") %>
+      <a
+      class="nav-link d-inline <%= isActive('/following') %>"
+      href="<%= currentUser ? ('/user/' + currentUser._id + '/following') : '/login?nextFollowing=1' %>"
+      <%= !currentUser ? 'onclick="alert(\'Please login first to continue\')"' : '' %>
+      >Following</a>
+        <a href="/post" class="nav-link <%= isActive('/post') %> text-decoration-none">ForYou</a>
+      </div>
+
+     <% if(posts.length === 0) { %>
+      <div class="outermostDiv">
+        <p class="text-center text-secondary fw-semibold" style="font-size: 18px;">No posts to show</p>
+      </div>
+      <% } else{%>
+      <% posts.forEach(post => { %>
+      <% const user = post && post.user ? post.user : {}; const userId = user._id || null; const userName = user.name || 'Unknown'; const isOwnProfile = currentUser && userId && String(currentUser._id) === String(userId); const isFollowing = currentUser && currentUser.following && userId && currentUser.following.some(f => String(f) === String(userId)); %>
+      <div class="post d-flex gap-3 align-items-center justify-content-center" data-post-id="<%= post._id %>" id="post-<%= post._id %>" data-post-index="<%= posts.indexOf(post) %>">
+        <!-- Post Content -->
+        <div
+          class="post-content d-flex flex-column align-items-start justify-content-center"
+          style="width: 400px; height: 83vh; overflow: hidden; margin: 20px ; margin: 0 !important;"
+        >
+          <% const media = (post.media && post.media.length) ? post.media[0] : null;
+             const mediaSrc = media && media.url ? ((/^https?:\/\//i.test(media.url) || media.url.startsWith('/')) ? media.url : '/' + media.url) : null; %>
+          <div class="media" style="width:100%; height:60vh;">
+            <% if (media && media.mediaType === 'video' && mediaSrc) { %>
+              <video controls style="width:100%; height:100%; display:block; border-radius:10px; object-fit:cover;">
+                <source src="<%= mediaSrc %>" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            <% } else if (media && media.mediaType === 'image' && mediaSrc) { %>
+              <img src="<%= mediaSrc %>" alt="post image" style="width:100%; height:100%; display:block; border-radius:10px; object-fit:cover;" />
+            <% } else { %>
+              <p style="text-align: center; margin-top: 40%">No media available</p>
+            <% } %>
+          </div>
+          <div
+            class="post-info d-flex flex-column align-items-start justify-content-center gap-1 mt-2"
+          >
+            <span class="fw-bold"><%= userName %></span>
+            <span class="post-caption">
+              <% const words = (post.caption || '').split(/\s+/); %>
+              <span class="caption-teaser"><%= words.slice(0,2).join(' ') %></span>
+              <% if (words.length > 2) { %>
+                <span class="caption-ellipsis"> </span>
+                <a href="#" class="read-more"> more</a>
+                <span class="caption-full d-none"><%= post.caption %></span>
+              <% } %>
+            </span>
+          </div>
+        </div>
+
+        <!-- Post Actions -->
+        <div
+          class="funtionalies d-flex flex-column align-items-center justify-content-center gap-0"
+        >
+          <% let profilePicSrc = '/assets/userProfilePic.png'; if (user &&
+          user.profilePic) { const pp = user.profilePic; const url = (typeof pp
+          === 'string') ? pp : (pp && pp.url ? pp.url : null); if (url) {
+          profilePicSrc = (/^https?:\/\//i.test(url) || url.startsWith('/')) ?
+          url : ('/' + url); } } %>
+          <div class="d-flex flex-column align-items-center">
+            <a href="<%= post.user._id ? ('/user/' + post.user._id) : '#' %>">
+              <img
+                src="<%= profilePicSrc %>"
+                alt="userProfilePicture"
+                class="rounded-circle"
+                style="width: 40px; height: 40px; object-fit: cover"
+              />
+            </a>
+            <form
+              action="<%= post.user._id ? ('/post/' + post.user._id) : '#' %>"
+              method="get"
+              class="text-decoration-none"
+            >
+              <% /* Show a small plus follow button when: not viewing own profile AND not already following the post's owner. Show it even to logged-out users. */ %>
+              <% if (!isOwnProfile && !(isFollowing)) { %>
+                <button type="button" class="follow-plus-btn" data-user-id="<%= userId %>" title="Follow" style="background: none; border: none; padding: 0">
+                  <i class="fa-solid fa-plus bg-danger text-white rounded-circle d-flex align-items-center justify-content-center position-relative" style="width: 22px; height: 22px; top: -10px; font-size: 14px"></i>
+                </button>
+              <% } %>
+
+              <i
+                class="fa-solid fa-plus bg-danger text-white rounded-circle d-flex align-items-center justify-content-center position-relative visually-hidden"
+                style="width: 22px; height: 22px; top: -10px; font-size: 14px; display: none"
+              ></i>
+
+            </form>
+          </div>
+          <% const isLiked = (typeof currentUser !== 'undefined' && currentUser
+          && post.likes && post.likes.some(l => String(l) ===
+          String(currentUser._id))); %> <% if (currentUser) { %> <form
+            action="/post/<%= post._id %>/like"
+            method="post"
+            class="text-decoration-none like-form"
+          >
+            <div class="d-flex flex-column align-items-center mt-2">
+              <button
+                type="submit"
+                class="mainPageFunctionalitiesIcons btn p-0 m-0"
+                style="
+                  border: none;
+                  background: #ffffff1f;
+                  color: inherit;
+                  border-radius: 50%;
+                "
+                aria-label="Like post"
+              >
+                <i class="fa-solid fa-heart <%= isLiked ? 'liked' : '' %>"></i>
+              </button>
+              <span class="like-count"><%= post.likes.length %></span>
+            </div>
+          </form>
+          <% } else { %>
+          <button type="button" class="text-decoration-none like-unauth btn p-0 m-0" data-post-id="<%= post._id %>" aria-label="Like post (login required)" style="background:none;border:none;">
+            <div class="d-flex flex-column align-items-center">
+              <span class="mainPageFunctionalitiesIcons"><i class="fa-solid fa-heart"></i></span>
+              <span><%= post.likes.length %></span>
+            </div>
+          </button>
+          <% } %>
+          <button
+            type="button"
+            class="open-comments-btn text-decoration-none"
+            data-post-id="<%= post._id %>"
+            data-post-index="<%= posts.indexOf(post) %>"
+            aria-label="Open comments"
+            style="background: none; border: none; padding: 0"
+          >
+            <div class="d-flex flex-column align-items-center">
+              <span class="mainPageFunctionalitiesIcons"
+                ><i class="fa-solid fa-comment-dots"></i
+              ></span>
+              <span class="comment-count"><%= post.comments.length %></span>
+            </div>
+          </button>
+          <% const isOwner = (typeof currentUser !== 'undefined' && currentUser
+          && userId && String(currentUser._id) === String(userId)); %> <% if
+          (isOwner) { %>
+          <a href="/post/<%= post._id %>/edit" class="text-decoration-none">
+            <div class="d-flex flex-column align-items-center">
+              <span class="mainPageFunctionalitiesIcons"
+                ><i class="fa-solid fa-pen"></i
+              ></span>
+            </div>
+          </a>
+          <form
+            action="/post/<%= post._id %>/delete?__method=DELETE"
+            method="post"
+            class="mt-2"
+          >
+            <div class="d-flex flex-column align-items-center">
+              <button
+                type="submit"
+                class="mainPageFunctionalitiesIcons"
+                style="border: none"
+                onclick="return confirm('Are you sure you want to delete this post?');"
+              >
+                <i
+                  class="fa-solid fa-trash-can"
+                  style="color: rgb(196, 38, 38) !important"
+                ></i>
+              </button>
+            </div>
+          </form>
+          <% } %>
+        </div>
+      </div>
+      <% }) %>
+<% } %>
+    </div>
+  </div>
+  <script src="/js/feedScroll.js"></script>
+  <!-- Comments bottom-sheet --> <div id="comments-backdrop" aria-hidden="true"></div> <aside id="comments-sheet" aria-hidden="true">
+    <div class="sheet-header">
+      <strong>Comments</strong>
+      <button
+        id="close-comments"
+        aria-label="Close comments"
+        style="background: none; border: none; font-size: 18px"
+      >
+        &times;
+      </button>
+    </div>
+    <div class="sheet-body" id="sheet-body">
+      <div id="comments-list"></div>
+    </div>
+    <div class="sheet-footer">
+      <form
+        id="comment-form"
+        data-logged-in="<%= currentUser ? '1' : '0' %>"
+        style="display: flex; gap: 8px; align-items: center; padding: 10px; border-top: 1px solid #eee;"
+      >
+        <input
+          id="comment-input"
+          name="text"
+          type="text"
+          placeholder="Write a comment..."
+          style="flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #ddd;"
+        />
+        <button
+          type="submit"
+          id="comment-submit"
+          <%= currentUser ? '' : 'disabled' %>
+          style="padding: 8px 12px; border-radius: 20px; background: #fe424d; color: #fff; border: none; opacity: <%= currentUser ? '1' : '0.5' %>;"
+        >
+          Send
+        </button>
+      </form>
+    </div>
+  </aside>
+  <script>
+    window.postsData = <%- JSON.stringify(posts || []) %>;
+    window.currentUser = <%- JSON.stringify(currentUser || null) %>;
+    window.selectedPostId = "<%= (typeof post !== 'undefined' && post) ? String(post._id) : '' %>";
+  </script>
+
+  <script>
+    (function(){
+      document.addEventListener('DOMContentLoaded', function(){
+        try {
+          var sel = window.selectedPostId;
+          if (sel) {
+            var el = document.querySelector('.post[data-post-id="' + sel + '"]') || document.getElementById('post-' + sel);
+            if (el) {
+              try { el.scrollIntoView({ behavior: 'auto', block: 'center' }); } catch(e) {}
+              el.classList.add('selected-post');
+              setTimeout(function(){ try { el.classList.remove('selected-post'); } catch(e){} }, 3000);
+            }
+          }
+        } catch (e) {}
+      });
+    })();
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.body.addEventListener('click', function (e) {
+        var likeUnauth = e.target.closest && e.target.closest('.like-unauth');
+        if (likeUnauth) {
+          e.preventDefault();
+          alert('Please log in first to continue');
+          return;
+        }
+
+        // Handle mobile top tabs 'Following' link when user is not logged in.
+        var loginNav = e.target.closest && e.target.closest('.top-mobile-tabs .nav-link');
+        if (loginNav) {
+          var href = loginNav.getAttribute('href') || '';
+          if ((!window.currentUser) && (href.indexOf('javascript:void') === 0 || loginNav.getAttribute('onclick'))) {
+            e.preventDefault();
+            alert('Please log in first to continue');
+            return;
+          }
+        }
+        if (e.target && e.target.classList.contains('read-more')) {
+          e.preventDefault();
+          const container = e.target.closest('.post-info');
+          if (!container) return;
+          const teaser = container.querySelector('.caption-teaser');
+          const full = container.querySelector('.caption-full');
+          const ellipsis = container.querySelector('.caption-ellipsis');
+          if (!full) return;
+          if (full.classList.contains('d-none')) {
+            full.classList.remove('d-none');
+            if (teaser) teaser.classList.add('d-none');
+            if (ellipsis) ellipsis.classList.add('d-none');
+            e.target.textContent = 'less';
+          } else {
+            full.classList.add('d-none');
+            if (teaser) teaser.classList.remove('d-none');
+            if (ellipsis) ellipsis.classList.remove('d-none');
+            e.target.textContent = 'more';
+          }
+        }
+      });
+    });
+  </script>
+  <script src="/js/commentsSheet.js"></script>
+  <style>
+    .follow-tick {
+      width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;
+      background: #28a745; color: #fff; font-size: 14px;
+      transform: scale(0.8); opacity: 0; transition: transform 250ms ease, opacity 250ms ease;
+    }
+    .follow-tick.show {
+      transform: scale(1); opacity: 1;
+    }
+    .selected-post {
+      box-shadow: 0 0 0 4px rgba(254,66,77,0.12);
+      transition: box-shadow 300ms ease;
+    }
+  </style>
+  <script>
+    (function(){
+      function animateAndHide(button) {
+        var icon = button.querySelector('i') || button;
+        var tick = document.createElement('span');
+        tick.className = 'follow-tick';
+        tick.innerHTML = '<i class="fa-solid fa-check"></i>';
+        // keep size and position
+        icon.style.display = 'none';
+        button.appendChild(tick);
+        // show animation
+        requestAnimationFrame(function(){ tick.classList.add('show'); });
+        setTimeout(function(){
+          try { button.style.display = 'none'; } catch(e){}
+        }, 700);
+      }
+
+      document.addEventListener('click', async function(e){
+        var el = e.target.closest('.follow-plus-btn, .follow-btn');
+        if (!el) return;
+        e.preventDefault();
+        var userId = el.getAttribute('data-user-id');
+        if (!userId) return;
+        // If not logged in, prompt to login
+        if (!window.currentUser) {
+          alert('Please log in first to continue');
+          return;
+        }
+        // disable to prevent duplicate clicks
+        el.disabled = true;
+        try {
+          var resp = await fetch('/user/' + userId + '/follow', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin'
+          });
+          if (!resp.ok) {
+            var err = await resp.json().catch(function(){ return { error: 'Request failed' }; });
+            alert(err && err.error ? err.error : 'Could not follow user');
+            el.disabled = false;
+            return;
+          }
+          var data = await resp.json();
+          if (data.status === 'followed') {
+            // update client-side currentUser.following to avoid showing plus again
+            try {
+              window.currentUser = window.currentUser || {};
+              window.currentUser.following = window.currentUser.following || [];
+              if (!window.currentUser.following.some(function(f){ return String(f) === String(userId); })) {
+                window.currentUser.following.push(userId);
+              }
+            } catch (e) {}
+            animateAndHide(el);
+          } else {
+            // if server returned unfollow (shouldn't happen for plus flow), re-enable
+            el.disabled = false;
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Could not complete action.');
+          el.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>

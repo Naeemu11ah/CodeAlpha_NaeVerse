@@ -1,0 +1,30 @@
+<%- layout("/layout/boilerplate") %>
+<div class="outermostDiv">
+  <div style="width: 300px" class="border p-2 rounded-3">
+    <h3 class="text-center">Edit <span class="text-danger">Post</span></h3>
+    <form
+      class="needs-validation"
+      novalidate
+      action="/post/<%= post._id  %>/edit?__method=PATCH"
+      method="post"
+    >
+      <div class="mb-3">
+        <textarea
+          class="form-control"
+          type="text"
+          class="form-control"
+          id="caption"
+          placeholder="eg. My first post"
+          name="caption"
+          maxlength="120"
+        >
+<%= post.caption %></textarea
+        >
+        <div class="invalid-feedback">
+          You have to enter full name of the subject!
+        </div>
+      </div>
+      <button type="submit" class="btn btn-danger w-100">Update</button>
+    </form>
+  </div>
+</div>

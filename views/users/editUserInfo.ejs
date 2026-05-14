@@ -1,0 +1,88 @@
+<%- layout("/layout/boilerplate") %>
+<body>
+  <div class="outermostDiv">
+    <div style="width: 300px" class="border py-2 px-3 rounded-3">
+      <h2 class="mb-3 text-center">
+        Edit <span style="color: red">profile</span>
+      </h2>
+      <form
+        method="post"
+        action="/user/profile/<%= user._id %>/edit?__method=PATCH"
+        enctype="multipart/form-data"
+        class="needs-validation"
+        novalidate
+      >
+        <div class="mb-2">
+          <label class="form-label" for="name">Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="name"
+            placeholder="Enter name"
+            name="name"
+            value="<%= user.name %>"
+            minlength="3"
+          />
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label" for="bio">Bio</label>
+          <textarea
+            class="form-control"
+            id="bio"
+            placeholder="Create bio"
+            name="bio"
+            maxlength="80"
+          >
+<%= user.bio %></textarea
+          >
+        </div>
+        <hr class="mb-1" />
+        <div class="mb-2">
+          <label class="form-label" for="username">Username</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            placeholder="Create username"
+            name="username"
+            minlength="3"
+            value="<%= user.username %>"
+            required
+          />
+          <div class="invalid-feedback">
+            Username should be at least 3 characters!
+          </div>
+        </div>
+
+        <div class="mb-2 mt-1">
+          <label class="form-label" for="password"
+            >Want to change password?</label
+          >
+          <input
+            type="password"
+            id="password"
+            class="form-control"
+            placeholder="Create new password"
+            name="password"
+            minlength="8"
+          />
+          <div class="invalid-feedback">
+            Password should be at least 8 characters!
+          </div>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input show-password" type="checkbox" id="showPassword" />
+          <label class="form-check-label" for="showPassword"
+            >Show password</label
+          >
+        </div>
+
+        <button type="submit" class="btn btn-danger w-100 my-2">
+          Save changes
+        </button>
+      </form>
+    </div>
+  </div>
+  <script src="/js/showPassswordCheckbox.js"></script>
+</body>

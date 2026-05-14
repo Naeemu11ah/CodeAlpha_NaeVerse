@@ -1,0 +1,161 @@
+<% layout("/layout/boilerplate") %>
+<div class="py-4 px-1">
+  <div
+    class="page-searchbar d-flex align-items-center justify-content-center gap-3"
+  >
+    <%- include("./includes/searchBar") %>
+    <a href="/" class="text-decoration-none page-searchbar search-close" aria-label="Close search"
+      ><i class="fa-solid fa-xmark fs-5"></i
+    ></a>
+  </div>
+  <!--  tab buttons -->
+  <div class="d-flex justify-content-start align-content-end gap-2 mt-2">
+    <button
+      class="tab-button"
+      data-tab="posts"
+      onclick="showTab('posts', this)"
+    >
+      <span class="fw-semibold" style="font-size: 18px">Posts</span>
+    </button>
+    <button
+      class="tab-button"
+      data-tab="liked"
+      onclick="showTab('liked', this)"
+    >
+      <span class="fw-semibold" style="font-size: 18px">Users</span>
+    </button>
+  </div>
+  <hr class="mt-0" />
+
+  <!-- results for posts -->
+  <div id="posts" class="tab">
+    <% if (!posts || posts.length === 0) { %>
+    <div class="d-flex alaign-items-center justify-content-center">
+      <p
+        class="text-secondary p-2 border border-danger rounded-3 text-center"
+        style="max-width: 500px"
+      >
+        No posts found for "<%= searchQuery || '' %>".
+      </p>
+    </div>
+    <% } else { %>
+    <div class="d-flex gap-3 mt-3 flex-wrap justify-content-start">
+      <% (posts || []).forEach((post) => { %>
+      <a href="/post/<%= post._id %>?list=search&query=<%= encodeURIComponent(searchQuery || '') %>" class="text-decoration-none text-black">
+        <div class="text-center" style="width: 150px">
+          <% const mediaObj = post.media && post.media.length ? post.media[0] :
+          null; %> <% const mediaUrl = mediaObj ? mediaObj.url : null; %> <%
+          const mediaType = mediaObj ? mediaObj.mediaType : null; %> <% const
+          mediaSrc = mediaUrl ? (mediaUrl.indexOf('http') === 0 ? mediaUrl : '/'
+          + mediaUrl) : '/assets/userProfilePic.png'; %> <% if (mediaType ===
+          'video') { %>
+          <video
+            class="rounded-2"
+            style="
+              width: 100%;
+              height: 205px;
+              object-fit: cover;
+              border-radius: 8px;
+              background: #000;
+            "
+          >
+            <source src="<%= mediaSrc %>" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <% } else { %>
+          <img
+            src="<%= mediaSrc %>"
+            class="rounded-2"
+            style="width: 100%; height: 205px; object-fit: cover"
+            alt="uploaded_post"
+          />
+          <% } %>
+        </div>
+      </a>
+      <% })%>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- results for users -->
+  <div id="liked" class="tab">
+    <% if (!users || users.length === 0) { %>
+    <div class="d-flex alaign-items-center justify-content-center">
+      <p
+        class="text-secondary p-2 border border-danger rounded-3 text-center"
+        style="max-width: 500px"
+      >
+        No users found for "<%= searchQuery || '' %>".
+      </p>
+    </div>
+    <% } else { %>
+    <div class="d-flex gap-3 mt-3 flex-column">
+      <% (users || []).forEach((u) => { %>
+      <a href="/user/<%= u._id %>" class="text-decoration-none text-black">
+        <div class="d-flex gap-3 align-items-center p-2 border rounded">
+          <div>
+            <img
+              src="<%= (u.profilePic && (typeof u.profilePic === 'string' ? u.profilePic : u.profilePic.url)) || '/assets/userProfilePic.png' %>"
+              alt="user_profile_pic"
+              style="
+                width: 65px;
+                height: 65px;
+                object-fit: cover;
+                border-radius: 50%;
+              "
+            />
+          </div>
+          <div class="d-flex flex-column">
+            <div class="fw-semibold"><%= u.name || u.username %></div>
+            <div style="color: rgb(240, 239, 236)" class="small ps-1">
+              <span class="text-secondary">@</span><%= u.username %>
+            </div>
+            <div class="text-secondary small ps-1">
+              <span
+                ><%= (u.followers && u.followers.length) || 0 %> followers</span
+              >
+              &nbsp;•&nbsp;
+              <span
+                ><%= (u.following && u.following.length) || 0 %> following</span
+              >
+            </div>
+          </div>
+        </div>
+      </a>
+      <% })%>
+    </div>
+    <% } %>
+  </div>
+</div>
+<script>
+  (function () {
+    document.addEventListener("DOMContentLoaded", function () {
+      function showTab(name, btn) {
+        document.querySelectorAll(".tab").forEach(function (t) {
+          t.classList.remove("active");
+          t.style.display = "none";
+        });
+        var el = document.getElementById(name);
+        if (el) {
+          el.classList.add("active");
+          el.style.display = "block";
+        }
+        document.querySelectorAll(".tab-button").forEach(function (b) {
+          b.classList.remove("active");
+        });
+        if (btn && btn.classList) btn.classList.add("active");
+      }
+
+      window.showTab = showTab;
+
+      var hash = window.location.hash
+        ? window.location.hash.replace("#", "")
+        : null;
+      var initial = hash && document.getElementById(hash) ? hash : "posts";
+      var initialBtn = document.querySelector(
+        '.tab-button[data-tab="' + initial + '"]',
+      );
+      showTab(initial, initialBtn);
+    });
+  })();
+</script>
