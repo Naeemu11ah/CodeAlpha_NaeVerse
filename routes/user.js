@@ -8,18 +8,14 @@ const {
   isUserOwner,
 } = require("../utils/middlewares");
 const controllersUser = require("../controllers/user");
+const {
+  validateSignup,
+  validateUserEdit,
+  validateProfilePic,
+} = require("../utils/validation");
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudConfig = require("../cloudConfig");
-// Multer-storage for profile pictures (store under `assets` folder)
-const profileStorage = new CloudinaryStorage({
-  cloudinary: cloudConfig.cloudinary,
-  params: {
-    folder: "assets",
-    allowed_formats: ["png", "jpg", "jpeg"],
-  },
-});
-const upload = multer({ storage: profileStorage });
+const upload = multer({ storage: cloudConfig.profileStorage });
 
 // user following account's posts
 router.get(
@@ -65,6 +61,7 @@ router.patch(
   isUserLoggedIn,
   isUserOwner,
   upload.single("profilePic"),
+  validateUserEdit,
   asyncWrap(controllersUser.updateUserInfo),
 );
 
@@ -80,6 +77,7 @@ router.patch(
   isUserLoggedIn,
   isUserOwner,
   upload.single("profilePic"),
+  validateProfilePic,
   asyncWrap(controllersUser.updateUserProfilePic),
 );
 
@@ -88,14 +86,14 @@ router.delete(
   "/user/profile/:id/editProfilePic",
   isUserLoggedIn,
   isUserOwner,
-  asyncWrap(controllersUser.deleteUserProfilePic)
+  asyncWrap(controllersUser.deleteUserProfilePic),
 );
 
 // signup or creating new accounts (public signup for social app)
 router
   .route("/signup")
   .get(controllersUser.renderSignupForm)
-  .post(asyncWrap(controllersUser.postingSignupForm));
+  .post(validateSignup, asyncWrap(controllersUser.postingSignupForm));
 
 // logging in
 router

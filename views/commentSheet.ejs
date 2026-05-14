@@ -1,0 +1,40 @@
+<!-- Comments bottom-sheet --> 
+  <div id="comments-backdrop" aria-hidden="true"></div> 
+   <aside id="comments-sheet" aria-hidden="true">
+    <div class="sheet-header">
+      <strong>Comments</strong>
+      <button
+        id="close-comments"
+        aria-label="Close comments"
+        style="background: none; border: none; font-size: 18px"
+      >
+        &times;
+      </button>
+    </div>
+    <div class="sheet-body" id="sheet-body">
+      <div id="comments-list"></div>
+    </div>
+    <div class="sheet-footer">
+      <form
+        id="comment-form"
+        data-logged-in="<%= currentUser ? '1' : '0' %>"
+        style="display: flex; gap: 8px; align-items: center; padding: 10px; border-top: 1px solid #eee;"
+      >
+        <input
+          id="comment-input"
+          name="text"
+          type="text"
+          placeholder="Write a comment..."
+          style="flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #ddd;"
+        />
+        <button
+          type="submit"
+          id="comment-submit"
+          <%= currentUser ? '' : 'disabled' %>
+          style="padding: 8px 12px; border-radius: 20px; background: #fe424d; color: #fff; border: none; opacity: <%= currentUser ? '1' : '0.5' %>;"
+        >
+          Send
+        </button>
+      </form>
+    </div>
+  </aside>

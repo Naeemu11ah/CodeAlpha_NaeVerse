@@ -1,11 +1,11 @@
 <%- layout('/layout/boilerplate') %>
 <body>
   <div class="container my-4 p-0">
-    <% 
-      const current = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : (request && request.user ? request.user : null);
-      const isOwnProfile = current && String(current._id) === String(user._id);
-      const isFollowing = current && current.following && current.following.some(id => String(id) === String(user._id));
-    %>
+    <% const current = (typeof currentUser !== 'undefined' && currentUser) ?
+    currentUser : (request && request.user ? request.user : null); const
+    isOwnProfile = current && String(current._id) === String(user._id); const
+    isFollowing = current && current.following && current.following.some(id =>
+    String(id) === String(user._id)); %>
     <!--offcanvas button-->
     <button
       class="mobile-menu-toggle"
@@ -27,7 +27,10 @@
           class="rounded-circle border"
           style="width: 172px; height: 172px; object-fit: cover"
         />
-        <a href="/user/profile/<%= user._id %>/editProfilePic" class="editingPositionOnMibileScreens">
+        <a
+          href="/user/profile/<%= user._id %>/editProfilePic"
+          class="editingPositionOnMibileScreens"
+        >
           <i
             class="fa-solid fa-pencil fs-5"
             style="position: relative; color: red; right: 20px; top: 35px"
@@ -37,7 +40,9 @@
       <div class="d-flex flex-column gap-1">
         <!-- name and username -->
         <div class="name-row d-flex flex-column align-items-center">
-          <div class="d-flex align-items-center name-edit-row aligningInColomnOnMobileScreens">
+          <div
+            class="d-flex align-items-center name-edit-row aligningInColomnOnMobileScreens"
+          >
             <h3 class="m-0">
               <%= user.name%><span class="mx-3 fs-4" style="color: #ffffff1f"
                 >|</span
@@ -121,7 +126,9 @@
             </p>
           </div>
           <% } else { %>
-          <div class="d-flex gap-3 mt-3 flex-wrap justify-content-start user-posts-grid">
+          <div
+            class="d-flex gap-3 mt-3 flex-wrap justify-content-start user-posts-grid"
+          >
             <% posts.forEach((post) => { %>
             <a
               href="/post/<%= post._id %>?list=posts&listOwner=<%= user._id %>"
@@ -175,7 +182,9 @@
             </p>
           </div>
           <% } else { %>
-          <div class="d-flex gap-3 mt-3 flex-wrap justify-content-start user-liked-grid">
+          <div
+            class="d-flex gap-3 mt-3 flex-wrap justify-content-start user-liked-grid"
+          >
             <% (likedPosts || []).forEach((post) => { %>
             <a
               href="/post/<%= post._id %>?list=liked&listOwner=<%= user._id %>"
@@ -223,88 +232,6 @@
   <%- include("../includes/offcanvas") %>
 </body>
 <script>
-  (function () {
-    // expose current user to client scripts so follow state can persist client-side
-    window.currentUser = <%- JSON.stringify(current || null) %>;
-    document.addEventListener("DOMContentLoaded", function () {
-      var btn = document.getElementById("followBtn");
-      if (btn) {
-        btn.addEventListener("click", async function (e) {
-          e.preventDefault();
-          var targetId = btn.getAttribute("data-user-id");
-          try {
-            var resp = await fetch("/user/" + targetId + "/follow", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              credentials: "same-origin",
-            });
-            if (!resp.ok) {
-              var err = await resp.json().catch(function () {
-                return { error: "Request failed" };
-              });
-              alert(err && err.error ? err.error : "Action failed");
-              return;
-            }
-            var data = await resp.json();
-            if (data.status === "followed") {
-              btn.textContent = "Unfollow";
-              btn.classList.remove("btn-danger");
-              btn.classList.add("btn-outline-danger");
-              try {
-                window.currentUser = window.currentUser || {};
-                window.currentUser.following = window.currentUser.following || [];
-                if (!window.currentUser.following.some(function (f) { return String(f) === String(targetId); })) {
-                  window.currentUser.following.push(targetId);
-                }
-              } catch (e) {}
-            } else if (data.status === "unfollowed") {
-              btn.textContent = "Follow";
-              btn.classList.remove("btn-outline-danger");
-              btn.classList.add("btn-danger");
-              try {
-                if (window.currentUser && window.currentUser.following) {
-                  window.currentUser.following = window.currentUser.following.filter(function (f) {
-                    return String(f) !== String(targetId);
-                  });
-                }
-              } catch (e) {}
-            }
-          } catch (err) {
-            console.error(err);
-            alert("Please Login to continue.");
-          }
-        });
-      }
-
-      // Tabs logic
-      function showTab(name, btn) {
-        document.querySelectorAll(".tab").forEach(function (t) {
-          t.classList.remove("active");
-          t.style.display = "none";
-        });
-        var el = document.getElementById(name);
-        if (el) {
-          el.classList.add("active");
-          el.style.display = "block";
-        }
-        document.querySelectorAll(".tab-button").forEach(function (b) {
-          b.classList.remove("active");
-        });
-        if (btn && btn.classList) btn.classList.add("active");
-      }
-
-      // Expose showTab to inline onclick handlers
-      window.showTab = showTab;
-
-      // Initialize tabs: use hash if present, otherwise default to 'posts'
-      var hash = window.location.hash
-        ? window.location.hash.replace("#", "")
-        : null;
-      var initial = hash && document.getElementById(hash) ? hash : "posts";
-      var initialBtn = document.querySelector(
-        '.tab-button[data-tab="' + initial + '"]',
-      );
-      showTab(initial, initialBtn);
-    });
-  })();
+  window.currentUser = <%- JSON.stringify(current || null) %>;
 </script>
+<script src="/js/userProfile.js"></script>

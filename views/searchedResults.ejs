@@ -1,10 +1,14 @@
 <% layout("/layout/boilerplate") %>
 <div class="py-4 px-1">
+  <!-- search bar -->
   <div
     class="page-searchbar d-flex align-items-center justify-content-center gap-3"
   >
     <%- include("./includes/searchBar") %>
-    <a href="/" class="text-decoration-none page-searchbar search-close" aria-label="Close search"
+    <a
+      href="/"
+      class="text-decoration-none page-searchbar search-close"
+      aria-label="Close search"
       ><i class="fa-solid fa-xmark fs-5"></i
     ></a>
   </div>
@@ -26,10 +30,10 @@
     </button>
   </div>
   <hr class="mt-0" />
-
   <!-- results for posts -->
   <div id="posts" class="tab">
     <% if (!posts || posts.length === 0) { %>
+    <!-- no posts found  -->
     <div class="d-flex alaign-items-center justify-content-center">
       <p
         class="text-secondary p-2 border border-danger rounded-3 text-center"
@@ -39,9 +43,13 @@
       </p>
     </div>
     <% } else { %>
+    <!-- if posts found -->
     <div class="d-flex gap-3 mt-3 flex-wrap justify-content-start">
       <% (posts || []).forEach((post) => { %>
-      <a href="/post/<%= post._id %>?list=search&query=<%= encodeURIComponent(searchQuery || '') %>" class="text-decoration-none text-black">
+      <a
+        href="/post/<%= post._id %>?list=search&query=<%= encodeURIComponent(searchQuery || '') %>"
+        class="text-decoration-none text-black"
+      >
         <div class="text-center" style="width: 150px">
           <% const mediaObj = post.media && post.media.length ? post.media[0] :
           null; %> <% const mediaUrl = mediaObj ? mediaObj.url : null; %> <%
@@ -76,10 +84,10 @@
     </div>
     <% } %>
   </div>
-
   <!-- results for users -->
   <div id="liked" class="tab">
     <% if (!users || users.length === 0) { %>
+    <!-- no users found  -->
     <div class="d-flex alaign-items-center justify-content-center">
       <p
         class="text-secondary p-2 border border-danger rounded-3 text-center"
@@ -89,6 +97,7 @@
       </p>
     </div>
     <% } else { %>
+    <!-- users found -->
     <div class="d-flex gap-3 mt-3 flex-column">
       <% (users || []).forEach((u) => { %>
       <a href="/user/<%= u._id %>" class="text-decoration-none text-black">
@@ -127,35 +136,4 @@
     <% } %>
   </div>
 </div>
-<script>
-  (function () {
-    document.addEventListener("DOMContentLoaded", function () {
-      function showTab(name, btn) {
-        document.querySelectorAll(".tab").forEach(function (t) {
-          t.classList.remove("active");
-          t.style.display = "none";
-        });
-        var el = document.getElementById(name);
-        if (el) {
-          el.classList.add("active");
-          el.style.display = "block";
-        }
-        document.querySelectorAll(".tab-button").forEach(function (b) {
-          b.classList.remove("active");
-        });
-        if (btn && btn.classList) btn.classList.add("active");
-      }
-
-      window.showTab = showTab;
-
-      var hash = window.location.hash
-        ? window.location.hash.replace("#", "")
-        : null;
-      var initial = hash && document.getElementById(hash) ? hash : "posts";
-      var initialBtn = document.querySelector(
-        '.tab-button[data-tab="' + initial + '"]',
-      );
-      showTab(initial, initialBtn);
-    });
-  })();
-</script>
+<script src="/js/searchTabs.js"></script>

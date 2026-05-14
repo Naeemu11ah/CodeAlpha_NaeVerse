@@ -93,7 +93,14 @@ nav {
   border-radius: 50%;
   font-size: 19px !important;
 }
-/* Keep functionality links neutral (prevent default blue in light mode) */
+
+/* ------------------------------------------
+--------------------------------------------|
+      Below styling is done by AI Agent     |
+--------------------------------------------|
+-------------------------------------------*/
+
+/* Privacy and Terms --   Keep functionality links neutral (prevent default blue in light mode) */
 .funtionalies a,
 .funtionalies a:link,
 .funtionalies a:visited {
@@ -108,15 +115,11 @@ nav {
 .mainPageFunctionalitiesIcons i {
   color: inherit !important;
 }
+
 /* heart when liked */
 .mainPageFunctionalitiesIcons i.liked {
   color: rgb(196, 38, 38) !important;
 }
-/* ---------------------------------------------
-Below styling is done by Ai Styling Assistant  /
----------------------
-Privacy and Terms    \
----------------------------------------------*/
 
 /* light mode footer background */
 footer {
@@ -1236,4 +1239,27 @@ body.dark-mode .mobile-menu-toggle i.fa-bars {
     align-items: center !important;
     gap: 0.1rem !important;
   }
+}
+
+.follow-tick {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #28a745;
+  color: #fff;
+  font-size: 14px;
+  transform: scale(0.8);
+  opacity: 0;
+  transition: transform 250ms ease, opacity 250ms ease;
+}
+.follow-tick.show {
+  transform: scale(1);
+  opacity: 1;
+}
+.selected-post {
+  box-shadow: 0 0 0 4px rgba(254, 66, 77, 0.12);
+  transition: box-shadow 300ms ease;
 }

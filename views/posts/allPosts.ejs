@@ -13,12 +13,13 @@
       >Following</a>
         <a href="/post" class="nav-link <%= isActive('/post') %> text-decoration-none">ForYou</a>
       </div>
-
      <% if(posts.length === 0) { %>
+      <!-- no posts -->
       <div class="outermostDiv">
         <p class="text-center text-secondary fw-semibold" style="font-size: 18px;">No posts to show</p>
       </div>
       <% } else{%>
+        <!-- if posts available -->
       <% posts.forEach(post => { %>
       <% const user = post && post.user ? post.user : {}; const userId = user._id || null; const userName = user.name || 'Unknown'; const isOwnProfile = currentUser && userId && String(currentUser._id) === String(userId); const isFollowing = currentUser && currentUser.following && userId && currentUser.following.some(f => String(f) === String(userId)); %>
       <div class="post d-flex gap-3 align-items-center justify-content-center" data-post-id="<%= post._id %>" id="post-<%= post._id %>" data-post-index="<%= posts.indexOf(post) %>">
@@ -56,7 +57,6 @@
             </span>
           </div>
         </div>
-
         <!-- Post Actions -->
         <div
           class="funtionalies d-flex flex-column align-items-center justify-content-center gap-0"
@@ -177,189 +177,13 @@
 <% } %>
     </div>
   </div>
-  <script src="/js/feedScroll.js"></script>
-  <!-- Comments bottom-sheet --> <div id="comments-backdrop" aria-hidden="true"></div> <aside id="comments-sheet" aria-hidden="true">
-    <div class="sheet-header">
-      <strong>Comments</strong>
-      <button
-        id="close-comments"
-        aria-label="Close comments"
-        style="background: none; border: none; font-size: 18px"
-      >
-        &times;
-      </button>
-    </div>
-    <div class="sheet-body" id="sheet-body">
-      <div id="comments-list"></div>
-    </div>
-    <div class="sheet-footer">
-      <form
-        id="comment-form"
-        data-logged-in="<%= currentUser ? '1' : '0' %>"
-        style="display: flex; gap: 8px; align-items: center; padding: 10px; border-top: 1px solid #eee;"
-      >
-        <input
-          id="comment-input"
-          name="text"
-          type="text"
-          placeholder="Write a comment..."
-          style="flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #ddd;"
-        />
-        <button
-          type="submit"
-          id="comment-submit"
-          <%= currentUser ? '' : 'disabled' %>
-          style="padding: 8px 12px; border-radius: 20px; background: #fe424d; color: #fff; border: none; opacity: <%= currentUser ? '1' : '0.5' %>;"
-        >
-          Send
-        </button>
-      </form>
-    </div>
-  </aside>
+  <%- include("../commentSheet") %>
   <script>
     window.postsData = <%- JSON.stringify(posts || []) %>;
     window.currentUser = <%- JSON.stringify(currentUser || null) %>;
     window.selectedPostId = "<%= (typeof post !== 'undefined' && post) ? String(post._id) : '' %>";
   </script>
-
-  <script>
-    (function(){
-      document.addEventListener('DOMContentLoaded', function(){
-        try {
-          var sel = window.selectedPostId;
-          if (sel) {
-            var el = document.querySelector('.post[data-post-id="' + sel + '"]') || document.getElementById('post-' + sel);
-            if (el) {
-              try { el.scrollIntoView({ behavior: 'auto', block: 'center' }); } catch(e) {}
-              el.classList.add('selected-post');
-              setTimeout(function(){ try { el.classList.remove('selected-post'); } catch(e){} }, 3000);
-            }
-          }
-        } catch (e) {}
-      });
-    })();
-  </script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      document.body.addEventListener('click', function (e) {
-        var likeUnauth = e.target.closest && e.target.closest('.like-unauth');
-        if (likeUnauth) {
-          e.preventDefault();
-          alert('Please log in first to continue');
-          return;
-        }
-
-        // Handle mobile top tabs 'Following' link when user is not logged in.
-        var loginNav = e.target.closest && e.target.closest('.top-mobile-tabs .nav-link');
-        if (loginNav) {
-          var href = loginNav.getAttribute('href') || '';
-          if ((!window.currentUser) && (href.indexOf('javascript:void') === 0 || loginNav.getAttribute('onclick'))) {
-            e.preventDefault();
-            alert('Please log in first to continue');
-            return;
-          }
-        }
-        if (e.target && e.target.classList.contains('read-more')) {
-          e.preventDefault();
-          const container = e.target.closest('.post-info');
-          if (!container) return;
-          const teaser = container.querySelector('.caption-teaser');
-          const full = container.querySelector('.caption-full');
-          const ellipsis = container.querySelector('.caption-ellipsis');
-          if (!full) return;
-          if (full.classList.contains('d-none')) {
-            full.classList.remove('d-none');
-            if (teaser) teaser.classList.add('d-none');
-            if (ellipsis) ellipsis.classList.add('d-none');
-            e.target.textContent = 'less';
-          } else {
-            full.classList.add('d-none');
-            if (teaser) teaser.classList.remove('d-none');
-            if (ellipsis) ellipsis.classList.remove('d-none');
-            e.target.textContent = 'more';
-          }
-        }
-      });
-    });
-  </script>
+  <script src="/js/feedScroll.js"></script>
   <script src="/js/commentsSheet.js"></script>
-  <style>
-    .follow-tick {
-      width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;
-      background: #28a745; color: #fff; font-size: 14px;
-      transform: scale(0.8); opacity: 0; transition: transform 250ms ease, opacity 250ms ease;
-    }
-    .follow-tick.show {
-      transform: scale(1); opacity: 1;
-    }
-    .selected-post {
-      box-shadow: 0 0 0 4px rgba(254,66,77,0.12);
-      transition: box-shadow 300ms ease;
-    }
-  </style>
-  <script>
-    (function(){
-      function animateAndHide(button) {
-        var icon = button.querySelector('i') || button;
-        var tick = document.createElement('span');
-        tick.className = 'follow-tick';
-        tick.innerHTML = '<i class="fa-solid fa-check"></i>';
-        // keep size and position
-        icon.style.display = 'none';
-        button.appendChild(tick);
-        // show animation
-        requestAnimationFrame(function(){ tick.classList.add('show'); });
-        setTimeout(function(){
-          try { button.style.display = 'none'; } catch(e){}
-        }, 700);
-      }
-
-      document.addEventListener('click', async function(e){
-        var el = e.target.closest('.follow-plus-btn, .follow-btn');
-        if (!el) return;
-        e.preventDefault();
-        var userId = el.getAttribute('data-user-id');
-        if (!userId) return;
-        // If not logged in, prompt to login
-        if (!window.currentUser) {
-          alert('Please log in first to continue');
-          return;
-        }
-        // disable to prevent duplicate clicks
-        el.disabled = true;
-        try {
-          var resp = await fetch('/user/' + userId + '/follow', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'same-origin'
-          });
-          if (!resp.ok) {
-            var err = await resp.json().catch(function(){ return { error: 'Request failed' }; });
-            alert(err && err.error ? err.error : 'Could not follow user');
-            el.disabled = false;
-            return;
-          }
-          var data = await resp.json();
-          if (data.status === 'followed') {
-            // update client-side currentUser.following to avoid showing plus again
-            try {
-              window.currentUser = window.currentUser || {};
-              window.currentUser.following = window.currentUser.following || [];
-              if (!window.currentUser.following.some(function(f){ return String(f) === String(userId); })) {
-                window.currentUser.following.push(userId);
-              }
-            } catch (e) {}
-            animateAndHide(el);
-          } else {
-            // if server returned unfollow (shouldn't happen for plus flow), re-enable
-            el.disabled = false;
-          }
-        } catch (err) {
-          console.error(err);
-          alert('Could not complete action.');
-          el.disabled = false;
-        }
-      });
-    })();
-  </script>
+  <script src="/js/allPosts.js"></script>
 </body>

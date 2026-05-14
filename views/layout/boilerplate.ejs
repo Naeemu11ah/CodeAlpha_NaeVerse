@@ -6,25 +6,21 @@
     <!-- basic SEO meta tags -->
     <meta
       name="description"
-      content="<%= metaDescription || 'Browse UOS past exam papers by subject and teacher' %>"
+      content="<%= metaDescription || 'NaeVerse - Your social universe' %>"
     />
     <meta
       name="keywords"
-      content="UOS past papers, University of Swat, exam papers,exam past paper, subjects, teachers"
+      content="NaeVerse, UOS, social media,  projects, internship, community, networking, events, resources"
     />
     <meta name="robots" content="index, follow" />
     <!-- Open Graph / Social sharing -->
-    <meta property="og:title" content="<%= title || 'UOS Past Papers' %>" />
+    <meta property="og:title" content="<%= title || 'NaeVerse' %>" />
     <meta
       property="og:description"
-      content="<%= metaDescription || 'Browse UOS past exam papers by subject and teacher' %>"
+      content="<%= metaDescription || 'NaeVerse - Your social universe' %>"
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="<%= request.originalUrl %>" />
-    <meta
-      property="og:image"
-      content="https://res.cloudinary.com/durkwcjdo/image/upload/v1772731033/uos_web_logo_mdsate.png"
-    />
     <title><%= title || 'NaeVerse' %></title>
     <link rel="icon" href="/assets/favicon.ico" />
     <link
@@ -73,12 +69,13 @@
         <p class="mt-3 text-white">Processing...</p>
       </div>
     </div>
+    <!-- main content area -->
     <div class="d-flex vh-100">
       <div class="sidePanel h-100"><%- include("../includes/sidePanel") %></div>
       <div class="mainScreen flex-grow-1 h-100">
         <div class="container h-100 paddingContronlMobileScreen">
-          <%- include("../includes/flash") %> <%- body %>
-          <%- include("../includes/bottomNav")  %>
+          <%- include("../includes/flash") %> <%- body %> <%-
+          include("../includes/bottomNav") %>
         </div>
       </div>
     </div>
@@ -90,8 +87,6 @@
     ></script>
     <script src="/js/script.js"></script>
     <script src="/js/showPassswordCheckbox.js"></script>
-    <script src="/js/modalAuth.js"></script>
-    <!-- Modal container for auth (login/signup) -->
-    <div id="auth-modal" class="auth-modal d-none" aria-hidden="true"></div>
+    <script src="/js/viewLabelPic.js"></script>
   </body>
 </html>

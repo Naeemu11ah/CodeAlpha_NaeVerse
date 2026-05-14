@@ -16,7 +16,17 @@ const storage = new CloudinaryStorage({
   },
 });
 
+// Profile pictures storage (smaller scope)
+const profileStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "assets",
+    allowed_formats: ["png", "jpg", "jpeg"],
+  },
+});
+
 module.exports = {
   cloudinary,
   storage,
+  profileStorage,
 };

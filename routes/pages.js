@@ -3,79 +3,24 @@ const router = express.Router();
 const asyncWrap = require("../utils/asyncWrap");
 const User = require("../models/user");
 const Post = require("../models/post");
+const controllersPages = require("../controllers/pages");
 function escapeRegex(text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|]/g, "\\$&");
 }
 
 // Landing page - all teachers
-router.get(
-  "/",
-  asyncWrap(async (req, res) => {
-    res.redirect("/post");
-  }),
-);
+router.get("/", asyncWrap(controllersPages.renderLandingPage));
 
 // getting terms and condition page
-router.get(
-  "/terms",
-  asyncWrap(async (req, res) => {
-    res.render("pages/terms&conditions", {
-      title: "Terms & Conditions – UOS Past Papers",
-      metaDescription:
-        "Read our terms and conditions for using UOS Past Papers.",
-    });
-  }),
-);
+router.get("/terms", asyncWrap(controllersPages.renderTermsPage));
 
 // getting privacy and policy page
-router.get(
-  "/privacy",
-  asyncWrap(async (req, res) => {
-    res.render("pages/privacyPolicy", {
-      title: "Privacy Policy – UOS Past Papers",
-      metaDescription: "Learn how we protect your privacy at UOS Past Papers.",
-    });
-  }),
-);
+router.get("/privacy", asyncWrap(controllersPages.renderPrivacyPage));
 
 // searched listings
-router.get(
-  "/search",
-  asyncWrap(async (req, res) => {
-    const query = (req.query.q || req.query.searchedQuery || "").trim();
-
-    if (!query) {
-      return res.render("searchedResults", {
-        posts: [],
-        users: [],
-        searchQuery: "",
-      });
-    }
-    const regex = new RegExp(escapeRegex(query), "i");
-    const posts = await Post.find({ caption: regex })
-      .sort({ createdAt: -1 })
-      .limit(50);
-
-    const users = await User.find({
-      $or: [{ name: regex }, { username: regex }],
-    })
-      .select("-password -email -__v")
-      .limit(50);
-
-    res.render("searchedResults", { posts, users, searchQuery: query });
-  }),
-);
+router.get("/search", asyncWrap(controllersPages.renderSearchResults));
 
 // getting about page
-router.get(
-  "/about",
-  asyncWrap(async (req, res) => {
-    res.render("pages/about", {
-      title: "About – UOS Past Papers",
-      metaDescription:
-        "Learn about the UOS Past Papers project and our mission.",
-    });
-  }),
-);
+router.get("/about", asyncWrap(controllersPages.renderAboutPage));
 
 module.exports = router;

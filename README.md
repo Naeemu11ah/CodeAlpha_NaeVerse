@@ -11,13 +11,13 @@ NaeVerse is a full-stack social media web application, this was assigned and bui
 
 ## Live Links
 
-- _GitHub Repository:_ [Add your GitHub link here]
+- _GitHub Repository:_ [CodeAlpha_NaeVerse](https://github.com/Naeemu11ah/CodeAlpha_NaeVerse.git)
 - _Demo Video:_ [Add your video link here]
-- _Live Link:_  `Not live yet!`
+- _Live Link:_ `Not live yet!`
 
 ## Features
 
-### Authentication
+### Authentication & authorization
 
 - Sign Up
 - Login
@@ -72,6 +72,12 @@ NaeVerse is a full-stack social media web application, this was assigned and bui
 
 - Light mode
 - Dark mode
+
+### Validation
+
+- Client side using Bootstrap validation
+- Server side using Joi
+- Database side using schemas
 
 ## Technology Stack
 

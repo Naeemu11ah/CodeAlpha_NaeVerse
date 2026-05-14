@@ -12,8 +12,6 @@ const session = require("express-session");
 // const { MongoStore } = require("connect-mongo");
 const postsRoute = require("./routes/posts");
 const pagesRoute = require("./routes/pages");
-// const subjectsRoute = require("./routes/subjects");
-// const teachersRoute = require("./routes/teachers");
 const userRoute = require("./routes/user");
 const methodOverride = require("method-override");
 const flash = require("connect-flash");
@@ -96,8 +94,6 @@ app.use((req, res, next) => {
 });
 
 // routing
-// app.use("/teacher", teachersRoute);
-// app.use("/subject", subjectsRoute);
 app.use("/post", postsRoute);
 app.use("/", userRoute);
 app.use("/", pagesRoute);
