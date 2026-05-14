@@ -1,45 +1,96 @@
-<% layout("/layout/boilerplate") %>
-<% function isActive(prefix) { if (!currentPath) return ""; return currentPath.startsWith(prefix) ? "active" : ""; } %>
+<% layout("/layout/boilerplate") %> <% function isActive(prefix) { if
+(!currentPath) return ""; return currentPath.startsWith(prefix) ? "active" : "";
+} %>
 <body>
-  <div class="container feed-container" style="padding: 0 !important;">
+  <div class="container feed-container" style="padding: 0 !important">
     <div class="posts">
       <!-- top panel for mobile screens -->
-      <div class="top-mobile-tabs position-absolute d-flex align-items-center justify-content-center gap-3 mt-3">
+      <div
+        class="top-mobile-tabs position-absolute d-flex align-items-center justify-content-center gap-3 mt-3"
+      >
         <%- include("../includes/searchBar") %>
       <a
-      class="nav-link d-inline <%= isActive('/following') %>"
-      href="<%= currentUser ? ('/user/' + currentUser._id + '/following') : '/login?nextFollowing=1' %>"
-      <%= !currentUser ? 'onclick="alert(\'Please login first to continue\')"' : '' %>
-      >Following</a>
-        <a href="/post" class="nav-link <%= isActive('/post') %> text-decoration-none">ForYou</a>
+        class="nav-link d-inline <%= isActive('/following') %>"
+        href="<%= currentUser ? ('/user/' + currentUser._id + '/following') : '/login?nextFollowing=1' %>"
+        <%= !currentUser ? 'onclick="alert(\'Please login first to continue\')"' : '' %>
+        >Following</a>
+     
+        <a
+          href="/post"
+          class="nav-link <%= isActive('/post') %> text-decoration-none"
+          >ForYou</a
+        >
       </div>
-     <% if(posts.length === 0) { %>
+      <% if(posts.length === 0) { %>
       <!-- no posts -->
       <div class="outermostDiv">
-        <p class="text-center text-secondary fw-semibold" style="font-size: 18px;">No posts to show</p>
+        <p
+          class="text-center text-secondary fw-semibold"
+          style="font-size: 18px"
+        >
+          No posts to show
+        </p>
       </div>
       <% } else{%>
-        <!-- if posts available -->
-      <% posts.forEach(post => { %>
-      <% const user = post && post.user ? post.user : {}; const userId = user._id || null; const userName = user.name || 'Unknown'; const isOwnProfile = currentUser && userId && String(currentUser._id) === String(userId); const isFollowing = currentUser && currentUser.following && userId && currentUser.following.some(f => String(f) === String(userId)); %>
-      <div class="post d-flex gap-3 align-items-center justify-content-center" data-post-id="<%= post._id %>" id="post-<%= post._id %>" data-post-index="<%= posts.indexOf(post) %>">
+      <!-- if posts available -->
+      <% posts.forEach(post => { %> <% const user = post && post.user ?
+      post.user : {}; const userId = user._id || null; const userName =
+      user.name || 'Unknown'; const isOwnProfile = currentUser && userId &&
+      String(currentUser._id) === String(userId); const isFollowing =
+      currentUser && currentUser.following && userId &&
+      currentUser.following.some(f => String(f) === String(userId)); %>
+      <div
+        class="post d-flex gap-3 align-items-center justify-content-center"
+        data-post-id="<%= post._id %>"
+        id="post-<%= post._id %>"
+        data-post-index="<%= posts.indexOf(post) %>"
+      >
         <!-- Post Content -->
         <div
           class="post-content d-flex flex-column align-items-start justify-content-center"
-          style="width: 400px; height: 83vh; overflow: hidden; margin: 20px ; margin: 0 !important;"
+          style="
+            width: 400px;
+            height: 83vh;
+            overflow: hidden;
+            margin: 20px;
+            margin: 0 !important;
+          "
         >
-          <% const media = (post.media && post.media.length) ? post.media[0] : null;
-             const mediaSrc = media && media.url ? ((/^https?:\/\//i.test(media.url) || media.url.startsWith('/')) ? media.url : '/' + media.url) : null; %>
-          <div class="media" style="width:100%; height:60vh;">
+          <% const media = (post.media && post.media.length) ? post.media[0] :
+          null; const mediaSrc = media && media.url ?
+          ((/^https?:\/\//i.test(media.url) || media.url.startsWith('/')) ?
+          media.url : '/' + media.url) : null; %>
+          <div class="media" style="width: 100%; height: 60vh">
             <% if (media && media.mediaType === 'video' && mediaSrc) { %>
-              <video controls style="width:100%; height:100%; display:block; border-radius:10px; object-fit:cover;">
-                <source src="<%= mediaSrc %>" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+            <video
+              controls
+              style="
+                width: 100%;
+                height: 100%;
+                display: block;
+                border-radius: 10px;
+                object-fit: cover;
+              "
+            >
+              <source src="<%= mediaSrc %>" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
             <% } else if (media && media.mediaType === 'image' && mediaSrc) { %>
-              <img src="<%= mediaSrc %>" alt="post image" style="width:100%; height:100%; display:block; border-radius:10px; object-fit:cover;" />
+            <img
+              src="<%= mediaSrc %>"
+              alt="post image"
+              style="
+                width: 100%;
+                height: 100%;
+                display: block;
+                border-radius: 10px;
+                object-fit: cover;
+              "
+            />
             <% } else { %>
-              <p style="text-align: center; margin-top: 40%">No media available</p>
+            <p style="text-align: center; margin-top: 40%">
+              No media available
+            </p>
             <% } %>
           </div>
           <div
@@ -48,11 +99,13 @@
             <span class="fw-bold"><%= userName %></span>
             <span class="post-caption">
               <% const words = (post.caption || '').split(/\s+/); %>
-              <span class="caption-teaser"><%= words.slice(0,2).join(' ') %></span>
+              <span class="caption-teaser"
+                ><%= words.slice(0,2).join(' ') %></span
+              >
               <% if (words.length > 2) { %>
-                <span class="caption-ellipsis"> </span>
-                <a href="#" class="read-more"> more</a>
-                <span class="caption-full d-none"><%= post.caption %></span>
+              <span class="caption-ellipsis"> </span>
+              <a href="#" class="read-more"> more</a>
+              <span class="caption-full d-none"><%= post.caption %></span>
               <% } %>
             </span>
           </div>
@@ -80,23 +133,40 @@
               method="get"
               class="text-decoration-none"
             >
-              <% /* Show a small plus follow button when: not viewing own profile AND not already following the post's owner. Show it even to logged-out users. */ %>
-              <% if (!isOwnProfile && !(isFollowing)) { %>
-                <button type="button" class="follow-plus-btn" data-user-id="<%= userId %>" title="Follow" style="background: none; border: none; padding: 0">
-                  <i class="fa-solid fa-plus bg-danger text-white rounded-circle d-flex align-items-center justify-content-center position-relative" style="width: 22px; height: 22px; top: -10px; font-size: 14px"></i>
-                </button>
+              <% /* Show a small plus follow button when: not viewing own
+              profile AND not already following the post's owner. Show it even
+              to logged-out users. */ %> <% if (!isOwnProfile && !(isFollowing))
+              { %>
+              <button
+                type="button"
+                class="follow-plus-btn"
+                data-user-id="<%= userId %>"
+                title="Follow"
+                style="background: none; border: none; padding: 0"
+              >
+                <i
+                  class="fa-solid fa-plus bg-danger text-white rounded-circle d-flex align-items-center justify-content-center position-relative"
+                  style="width: 22px; height: 22px; top: -10px; font-size: 14px"
+                ></i>
+              </button>
               <% } %>
 
               <i
                 class="fa-solid fa-plus bg-danger text-white rounded-circle d-flex align-items-center justify-content-center position-relative visually-hidden"
-                style="width: 22px; height: 22px; top: -10px; font-size: 14px; display: none"
+                style="
+                  width: 22px;
+                  height: 22px;
+                  top: -10px;
+                  font-size: 14px;
+                  display: none;
+                "
               ></i>
-
             </form>
           </div>
           <% const isLiked = (typeof currentUser !== 'undefined' && currentUser
           && post.likes && post.likes.some(l => String(l) ===
-          String(currentUser._id))); %> <% if (currentUser) { %> <form
+          String(currentUser._id))); %> <% if (currentUser) { %>
+          <form
             action="/post/<%= post._id %>/like"
             method="post"
             class="text-decoration-none like-form"
@@ -119,9 +189,17 @@
             </div>
           </form>
           <% } else { %>
-          <button type="button" class="text-decoration-none like-unauth btn p-0 m-0" data-post-id="<%= post._id %>" aria-label="Like post (login required)" style="background:none;border:none;">
+          <button
+            type="button"
+            class="text-decoration-none like-unauth btn p-0 m-0"
+            data-post-id="<%= post._id %>"
+            aria-label="Like post (login required)"
+            style="background: none; border: none"
+          >
             <div class="d-flex flex-column align-items-center">
-              <span class="mainPageFunctionalitiesIcons"><i class="fa-solid fa-heart"></i></span>
+              <span class="mainPageFunctionalitiesIcons"
+                ><i class="fa-solid fa-heart"></i
+              ></span>
               <span><%= post.likes.length %></span>
             </div>
           </button>
@@ -173,12 +251,11 @@
           <% } %>
         </div>
       </div>
-      <% }) %>
-<% } %>
+      <% }) %> <% } %>
     </div>
   </div>
-  <%- include("../commentSheet") %>
-  <script>
+  <%- include("../includes/commentSheet") %>
+ <script>
     window.postsData = <%- JSON.stringify(posts || []) %>;
     window.currentUser = <%- JSON.stringify(currentUser || null) %>;
     window.selectedPostId = "<%= (typeof post !== 'undefined' && post) ? String(post._id) : '' %>";
