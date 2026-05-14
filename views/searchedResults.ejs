@@ -50,34 +50,39 @@
         href="/post/<%= post._id %>?list=search&query=<%= encodeURIComponent(searchQuery || '') %>"
         class="text-decoration-none text-black"
       >
-        <div class="text-center" style="width: 150px">
-          <% const mediaObj = post.media && post.media.length ? post.media[0] :
-          null; %> <% const mediaUrl = mediaObj ? mediaObj.url : null; %> <%
-          const mediaType = mediaObj ? mediaObj.mediaType : null; %> <% const
-          mediaSrc = mediaUrl ? (mediaUrl.indexOf('http') === 0 ? mediaUrl : '/'
-          + mediaUrl) : '/assets/userProfilePic.png'; %> <% if (mediaType ===
-          'video') { %>
-          <video
-            class="rounded-2"
-            style="
-              width: 100%;
-              height: 205px;
-              object-fit: cover;
-              border-radius: 8px;
-              background: #000;
-            "
-          >
-            <source src="<%= mediaSrc %>" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-          <% } else { %>
-          <img
-            src="<%= mediaSrc %>"
-            class="rounded-2"
-            style="width: 100%; height: 205px; object-fit: cover"
-            alt="uploaded_post"
-          />
-          <% } %>
+        <div style="width: 150px">
+          <div class="text-center" style="width: 150px">
+            <% const mediaObj = post.media && post.media.length ? post.media[0]
+            : null; %> <% const mediaUrl = mediaObj ? mediaObj.url : null; %> <%
+            const mediaType = mediaObj ? mediaObj.mediaType : null; %> <% const
+            mediaSrc = mediaUrl ? (mediaUrl.indexOf('http') === 0 ? mediaUrl :
+            '/' + mediaUrl) : '/assets/userProfilePic.png'; %> <% if (mediaType
+            === 'video') { %>
+            <video
+              class="rounded-2"
+              style="
+                width: 100%;
+                height: 205px;
+                object-fit: cover;
+                border-radius: 8px;
+                background: #000;
+              "
+            >
+              <source src="<%= mediaSrc %>" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            <% } else { %>
+            <img
+              src="<%= mediaSrc %>"
+              class="rounded-2"
+              style="width: 100%; height: 205px; object-fit: cover"
+              alt="uploaded_post"
+            />
+            <% } %>
+          </div>
+          <p class="p-0 mt-1" style="line-height: 1.2; font-size: 14px">
+            <%= post.caption %>
+          </p>
         </div>
       </a>
       <% })%>
