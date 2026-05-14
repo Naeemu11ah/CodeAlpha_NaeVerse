@@ -36,18 +36,113 @@ module.exports.renderSearchResults = async (req, res) => {
       searchQuery: "",
     });
   }
-  const regex = new RegExp(escapeRegex(query), "i");
-  const posts = await Post.find({ caption: regex })
-    .sort({ createdAt: -1 })
-    .limit(50);
 
-  const users = await User.find({
-    $or: [{ name: regex }, { username: regex }],
-  })
-    .select("-password -email -__v")
-    .limit(50);
+  // Helpers for fuzzy matching and scoring
+  function tokenizeForSearch(text) {
+    if (!text) return [];
+    return String(text)
+      .toLowerCase()
+      .split(/\s+/)
+      .map((t) => t.replace(/[^a-z0-9]+/gi, ""))
+      .filter(Boolean);
+  }
 
-  res.render("searchedResults", { posts, users, searchQuery: query });
+  function levenshtein(a, b) {
+    a = String(a || "");
+    b = String(b || "");
+    if (a === b) return 0;
+    if (!a.length) return b.length;
+    if (!b.length) return a.length;
+    const matrix = Array.from({ length: a.length + 1 }, () => []);
+    for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+    for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j - 1] + cost
+        );
+      }
+    }
+    return matrix[a.length][b.length];
+  }
+
+  function similarity(a, b) {
+    const maxLen = Math.max(String(a).length, String(b).length);
+    if (maxLen === 0) return 1;
+    const dist = levenshtein(a, b);
+    return 1 - dist / maxLen; // normalized to 0..1
+  }
+
+  function scoreTextAgainstQuery(text, queryTokens) {
+    const textTokens = tokenizeForSearch(text);
+    if (!queryTokens.length || !textTokens.length) return 0;
+    let total = 0;
+    for (const q of queryTokens) {
+      let best = 0;
+      for (const t of textTokens) {
+        if (!t || !q) continue;
+        if (t.includes(q)) {
+          best = 1; // exact substring match -> best possible
+          break;
+        }
+        const s = similarity(q, t);
+        if (s > best) best = s;
+      }
+      total += best;
+    }
+    return total / queryTokens.length;
+  }
+
+  // Break query into tokens and use them to fetch candidates from DB
+  const tokens = tokenizeForSearch(query).filter((t) => t.length >= 2);
+  if (!tokens.length) {
+    // fallback to the original strict regex search for very short tokens
+    const regex = new RegExp(escapeRegex(query), "i");
+    const posts = await Post.find({ caption: regex }).sort({ createdAt: -1 }).limit(50);
+    const users = await User.find({ $or: [{ name: regex }, { username: regex }] })
+      .select("-password -email -__v")
+      .limit(50);
+    return res.render("searchedResults", { posts, users, searchQuery: query });
+  }
+
+  // Build a MongoDB OR query that matches any token in caption/name/username
+  const postOr = tokens.map((t) => ({ caption: new RegExp(escapeRegex(t), "i") }));
+  const userOr = tokens
+    .map((t) => ({ name: new RegExp(escapeRegex(t), "i") }))
+    .concat(tokens.map((t) => ({ username: new RegExp(escapeRegex(t), "i") })));
+
+  // Retrieve a reasonable candidate set then score in-memory
+  const [postCandidates, userCandidates] = await Promise.all([
+    Post.find({ $or: postOr }).limit(500),
+    User.find({ $or: userOr }).select("-password -email -__v").limit(200),
+  ]);
+
+  const scoredPosts = postCandidates
+    .map((p) => {
+      const s = scoreTextAgainstQuery(p.caption || "", tokens);
+      return { item: p, score: s };
+    })
+    .filter((x) => x.score >= 0.4) // require ~40% similarity for inclusion
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 50)
+    .map((x) => x.item);
+
+  const scoredUsers = userCandidates
+    .map((u) => {
+      const nameScore = scoreTextAgainstQuery(u.name || "", tokens);
+      const usernameScore = scoreTextAgainstQuery(u.username || "", tokens);
+      const s = Math.max(nameScore, usernameScore);
+      return { item: u, score: s };
+    })
+    .filter((x) => x.score >= 0.4)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 50)
+    .map((x) => x.item);
+
+  res.render("searchedResults", { posts: scoredPosts, users: scoredUsers, searchQuery: query });
 };
 
 module.exports.renderAboutPage = async (req, res) => {
