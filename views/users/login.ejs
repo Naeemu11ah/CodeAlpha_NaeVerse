@@ -4,8 +4,16 @@
     <div style="width: 300px">
       <h2 class="mb-3 text-center fw-bold">Log in</h2>
       <form method="post" action="/login" class="needs-validation" novalidate>
-        <input type="hidden" name="next" value="<%= typeof next !== 'undefined' ? next : '' %>" />
-        <input type="hidden" name="nextFollowing" value="<%= typeof nextFollowing !== 'undefined' ? nextFollowing : '' %>" />
+        <input
+          type="hidden"
+          name="next"
+          value="<%= typeof next !== 'undefined' ? next : '' %>"
+        />
+        <input
+          type="hidden"
+          name="nextFollowing"
+          value="<%= typeof nextFollowing !== 'undefined' ? nextFollowing : '' %>"
+        />
         <div class="mb-2">
           <input
             type="text"
@@ -14,7 +22,11 @@
             placeholder="Enter username"
             name="username"
             required
+            minlength="4"
           />
+          <div class="invalid-feedback">
+            Username should be at least 4 characters!
+          </div>
         </div>
         <div class="mb-2">
           <input

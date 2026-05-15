@@ -27,6 +27,7 @@
           class="rounded-circle border"
           style="width: 172px; height: 172px; object-fit: cover"
         />
+        <% if (isOwnProfile) { %>
         <a
           href="/user/profile/<%= user._id %>/editProfilePic"
           class="editingPositionOnMibileScreens"
@@ -36,6 +37,7 @@
             style="position: relative; color: red; right: 20px; top: 35px"
           ></i>
         </a>
+        <% } %>
       </div>
       <div class="d-flex flex-column gap-1">
         <!-- name and username -->

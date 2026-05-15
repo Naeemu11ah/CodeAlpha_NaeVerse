@@ -247,10 +247,14 @@ footer {
     display: flex !important;
   }
 
-  /* Make active links clear and prominent on mobile (icons + labels) */
-  .top-mobile-tabs .nav-link,
+  /* Make active links clear and prominent on mobile (icons + labels)
+     Top tabs should be dark in light mode; bottom nav keeps white on dark bg. */
+  .top-mobile-tabs .nav-link {
+    color: #000; /* visible in light mode */
+  }
+
   .bottom-nav .nav-link {
-    color: #ffffff; /* default mobile color (bottom has dark bg) */
+    color: #ffffff; /* bottom has dark bg, keep white */
   }
 
   .top-mobile-tabs .nav-link.active:not(.no-active-color),
@@ -337,6 +341,16 @@ body.dark-mode .offcanvas_anchorTags {
 body.dark-mode .nav-link.active:not(.no-active-color),
 body.dark-mode .offcanvas_anchorTags.active {
   border-bottom-color: #ff8686 !important;
+}
+/* Ensure post overlay text and inline counts are light in dark mode */
+body.dark-mode .post-info {
+  color: #e0e0e0 !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+body.dark-mode .funtionalies .like-count,
+body.dark-mode .funtionalies .comment-count {
+  color: #e0e0e0 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 /* cards and panels */
@@ -898,12 +912,13 @@ body.dark-mode .auth-modal-card {
     font-size: 17px !important;
   }
 
-  /* keep counts readable over video */
+  /* keep counts readable over video (light mode defaults to dark text)
+     Dark-mode overrides below will flip these to light text. */
   .funtionalies .like-count,
   .funtionalies .comment-count {
     font-size: 12px;
-    color: white;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    color: #000;
+    text-shadow: none;
   }
 
   /* Post caption and user name sit on bottom-left over media */
@@ -912,8 +927,8 @@ body.dark-mode .auth-modal-card {
     left: 12px;
     bottom: 18px;
     z-index: 2100;
-    color: #fff;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+    color: #000; /* ensure black in light mode */
+    text-shadow: none;
     max-width: 70%;
   }
 
