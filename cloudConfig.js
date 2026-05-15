@@ -21,6 +21,7 @@ const profileStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: "assets",
+    resource_type: 'auto',
     allowed_formats: ["png", "jpg", "jpeg"],
   },
 });

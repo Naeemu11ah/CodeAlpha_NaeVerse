@@ -15,7 +15,11 @@ const {
 } = require("../utils/validation");
 const multer = require("multer");
 const cloudConfig = require("../cloudConfig");
-const upload = multer({ storage: cloudConfig.profileStorage });
+// Limit profile picture uploads to 5MB to avoid long uploads/timeouts
+const upload = multer({
+  storage: cloudConfig.profileStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
 
 // user following account's posts
 router.get(
