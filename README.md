@@ -12,7 +12,7 @@ NaeVerse is a full-stack social media web application, this was assigned and bui
 ## Live Links
 
 - _GitHub Repository:_ [CodeAlpha_NaeVerse](https://github.com/Naeemu11ah/CodeAlpha_NaeVerse.git)
-- _Demo Video:_ [Add your video link here]
+- _Demo Video:_ [watch video on linkedIn](https://www.linkedin.com/posts/naeemullah-%7E-081059352_codealpha-internshipproject-fullstackdevelopment-ugcPost-7461100443889270784-w1Op?utm_source=share&utm_medium=member_desktop&rcm=ACoAAFftsiEB4tZusIFGExXzwDNsmOyFmnG3S1s)
 - _Live Link:_ `Not live yet!`
 
 ## Features
