@@ -5,6 +5,8 @@
     currentUser : (request && request.user ? request.user : null); const
     isOwnProfile = current && String(current._id) === String(user._id); const
     isFollowing = current && current.following && current.following.some(id =>
+    String(id) === String(user._id)); const isFollowRequested = current &&
+    current.sentFollowRequests && current.sentFollowRequests.some(id =>
     String(id) === String(user._id)); %>
     <!--offcanvas button-->
     <button
@@ -53,7 +55,7 @@
             <h5 class="m-0" style="color: #ffffff99"><%=user.username %></h5>
           </div>
         </div>
-        <!-- following, following and likes-->
+        <!-- following, following and friends-->
         <div>
           <span class="me-3"
             ><strong><%= user.followers.length %></strong> followers</span
@@ -64,7 +66,9 @@
           <% let totalLikes = 0; if (posts && posts.length) {
           posts.forEach(function(p) { totalLikes += (p.likes && p.likes.length)
           || 0; }); } %>
-          <span><strong><%= totalLikes %></strong> likes</span>
+          <span class="me-3"
+            ><strong><%= user.friends.length %></strong> Friends</span
+          >
         </div>
         <!-- edit and follow profile -->
         <div class="my-1">
@@ -80,12 +84,63 @@
           <button
             id="followBtn"
             data-user-id="<%= user._id %>"
-            class="btn <%= isFollowing ? 'btn-outline-danger' : 'btn-danger' %>"
+            class="btn <%= isFollowing ? 'btn-outline-danger' : (isFollowRequested ? 'btn-outline-secondary' : 'btn-danger') %>"
             style="border-radius: 50px !important"
           >
-            <%= isFollowing ? 'Unfollow' : 'Follow' %>
+            <%= isFollowing ? 'Unfollow' : (isFollowRequested ? 'Cancel Request'
+            : 'Follow') %>
           </button>
-          <% } %>
+
+          <% if (typeof isFriend !== 'undefined' && isFriend) { %>
+          <button
+            id="friendRequestBtn"
+            data-user-id="<%= user._id %>"
+            data-action="unfriend"
+            class="btn btn-outline-danger"
+            style="border-radius: 50px !important"
+          >
+            Unfriend
+          </button>
+          <% } else if (typeof isRequestSent !== 'undefined' && isRequestSent) {
+          %>
+          <button
+            id="friendRequestBtn"
+            data-user-id="<%= user._id %>"
+            data-request-id="<%= sentRequest ? sentRequest._id : '' %>"
+            data-action="cancel"
+            class="btn btn-outline-secondary"
+            style="border-radius: 50px !important"
+          >
+            Cancel Request
+          </button>
+          <% } else if (typeof isRequestReceived !== 'undefined' &&
+          isRequestReceived) { %>
+          <button
+            id="friendAcceptBtn"
+            data-request-id="<%= receivedRequest ? receivedRequest._id : '' %>"
+            class="btn btn-success"
+            style="border-radius: 50px !important"
+          >
+            Accept
+          </button>
+          <button
+            id="friendRejectBtn"
+            data-request-id="<%= receivedRequest ? receivedRequest._id : '' %>"
+            class="btn btn-outline-secondary ms-2"
+            style="border-radius: 50px !important"
+          >
+            Reject
+          </button>
+          <% } else { %>
+          <button
+            id="friendRequestBtn"
+            data-user-id="<%= user._id %>"
+            class="btn btn-primary"
+            style="border-radius: 50px !important"
+          >
+            Add friend
+          </button>
+          <% } %> <% } %>
         </div>
         <!-- bio -->
         <div>
@@ -118,8 +173,17 @@
 
         <!-- Displaying uploaded posts tab-->
         <div id="posts" class="tab">
-          <% if (!posts || posts.length === 0) { %>
-          <div class="d-flex alaign-items-center justify-content-center">
+          <% if (user.privacy === 'private' && !isOwnProfile && !isFriend) { %>
+          <div class="d-flex align-items-center justify-content-center mt-4">
+            <p
+              class="text-secondary p-2 border border-danger rounded-3 text-center"
+              style="max-width: 500px"
+            >
+              <%= user.name %> has made their account private.
+            </p>
+          </div>
+          <% } else if (!posts || posts.length === 0) { %>
+          <div class="d-flex align-items-center justify-content-center mt-4">
             <p
               class="text-secondary p-2 border border-danger rounded-3 text-center"
               style="max-width: 500px"
@@ -174,8 +238,17 @@
 
         <!-- Displaying liked posts -->
         <div id="liked" class="tab">
-          <% if (!likedPosts || likedPosts.length === 0) { %>
-          <div class="d-flex alaign-items-center justify-content-center">
+          <% if (user.privacy === 'private' && !isOwnProfile && !isFriend) { %>
+          <div class="d-flex align-items-center justify-content-center mt-4">
+            <p
+              class="text-secondary p-2 border border-danger rounded-3 text-center"
+              style="max-width: 500px"
+            >
+              <%= user.name %> has made their account private.
+            </p>
+          </div>
+          <% } else if (!likedPosts || likedPosts.length === 0) { %>
+          <div class="d-flex align-items-center justify-content-center mt-4">
             <p
               class="text-secondary p-2 border border-danger rounded-3 text-center"
               style="max-width: 500px"
@@ -231,6 +304,7 @@
       </div>
     </div>
   </div>
+
   <%- include("../includes/offcanvas") %>
 </body>
 <script>

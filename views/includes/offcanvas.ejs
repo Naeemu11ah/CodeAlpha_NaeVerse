@@ -24,6 +24,8 @@ currentPath.startsWith(prefix) ? "active" : ""; } %>
   <div class="offcanvas-body">
     <div class="list-group bg-transparent">
       <div class="d-flex flex-column gap-3 p-3 bg-white" style="width: 220px">
+
+        <!-- Theme Toggle -->
         <button
           id="theme-toggle"
           class="btn-link nav-link d-flex gap-3"
@@ -33,6 +35,15 @@ currentPath.startsWith(prefix) ? "active" : ""; } %>
           <span id="theme-text">Theme</span>
         </button>
 
+        <!-- privacy settings -->
+        <a class="nav-link d-inline <%= isActive('/privacySettings') %>" href="<%= currentUser ? '/privacySettings' : 'javascript:void(0)' %>" <%= !currentUser ? 'data-login-required="1" onclick="alert(\'Please login first to continue\'); return false;"' : '' %>>
+          <div class="d-flex gap-3 align-content-center">
+            <i class="fa-solid fa-unlock-keyhole" style="font-size: 19px"></i>
+            <span class="fw-semibold">Privacy</span>
+          </div>
+        </a>
+        
+        <!-- logout -->
         <% if (currentUser) { %>
         <a class="nav-link d-inline" href="/logout"
           ><div class="d-flex gap-3 align-content-center">
@@ -43,6 +54,8 @@ currentPath.startsWith(prefix) ? "active" : ""; } %>
             ><span class="fw-semibold">Log out</span>
           </div></a
         >
+
+        <!-- delete account -->
         <form
           action="/user/<%= currentUser._id %>/delete?__method=DELETE"
           class="nav-link d-inline"
@@ -59,6 +72,7 @@ currentPath.startsWith(prefix) ? "active" : ""; } %>
           </button>
         </form>
 
+        <!-- login/signup -->
         <%}%> <% if (!currentUser) { %>
         <a class="nav-link d-inline <%= isActive('/login') %>" href="/login"
           ><div class="d-flex gap-3 align-content-center">
@@ -74,6 +88,8 @@ currentPath.startsWith(prefix) ? "active" : ""; } %>
         >
         <% } %>
         <hr />
+
+        <!-- about us, terms and privacy -->
         <a class="nav-link d-inline" href="/about">
           <span class="text-secondary fw-semibold">About us</span>
         </a>

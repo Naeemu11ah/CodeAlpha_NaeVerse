@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const PORT = process.env.PORT || 3000;
 const express = require("express");
 const app = express();
+const http = require("http");
 const path = require("path");
 const ejsMate = require("ejs-mate");
 const session = require("express-session");
@@ -13,6 +14,8 @@ const session = require("express-session");
 const postsRoute = require("./routes/posts");
 const pagesRoute = require("./routes/pages");
 const userRoute = require("./routes/user");
+const notificationsRoute = require("./routes/notifications");
+const friendsRoute = require("./routes/friendRequests");
 const methodOverride = require("method-override");
 const flash = require("connect-flash");
 const User = require("./models/user");
@@ -97,6 +100,8 @@ app.use((req, res, next) => {
 app.use("/post", postsRoute);
 app.use("/", userRoute);
 app.use("/", pagesRoute);
+app.use("/notifications", notificationsRoute);
+app.use("/friends", friendsRoute);
 
 // Error handling middlewares
 app.use((err, req, res, next) => {
@@ -109,7 +114,33 @@ app.use((req, res, next) => {
   res.status(404).render("error.ejs", { message });
 });
 
-const server = app.listen(PORT, () => {
+// create HTTP server and attach Socket.IO
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server, {
+  // default options — adjust origins in production
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+// expose io to routes/controllers via app.get('io')
+app.set("io", io);
+
+io.on("connection", (socket) => {
+  // client should emit 'join' with { userId }
+  socket.on("join", (data) => {
+    try {
+      const userId = data && (data.userId || data.id);
+      if (userId) socket.join(String(userId));
+    } catch (e) {}
+  });
+
+  socket.on("disconnect", () => {});
+});
+
+server.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
 

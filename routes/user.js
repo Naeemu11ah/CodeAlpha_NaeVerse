@@ -28,8 +28,18 @@ router.get(
   asyncWrap(controllersUser.videosFollowingAccounts),
 );
 
+// user friends' posts
+router.get(
+  "/user/:id/friends",
+  isUserLoggedIn,
+  asyncWrap(controllersUser.videosFriendsAccounts),
+);
+
 // view individual user profile
 router.get("/user/:id", asyncWrap(controllersUser.showUserProfile));
+
+// minimal JSON user info (used by client-side notification rendering)
+router.get("/api/user/:id", asyncWrap(controllersUser.userInfo));
 
 // follow/unfollow toggle (AJAX)
 router.post(
@@ -91,6 +101,40 @@ router.delete(
   isUserLoggedIn,
   isUserOwner,
   asyncWrap(controllersUser.deleteUserProfilePic),
+);
+
+// viewing user activity (likes, comments, friend requests, etc.)
+router.get(
+  "/user/:id/activity",
+  isUserLoggedIn,
+  asyncWrap(controllersUser.showUserActivity),
+);
+
+// approve / reject follow requests (for private accounts)
+router.post(
+  "/user/:id/follow/approve/:requesterId",
+  isUserLoggedIn,
+  isUserOwner,
+  asyncWrap(controllersUser.approveFollowRequest),
+);
+router.post(
+  "/user/:id/follow/reject/:requesterId",
+  isUserLoggedIn,
+  isUserOwner,
+  asyncWrap(controllersUser.rejectFollowRequest),
+);
+
+// Privacy settings UI
+router.get(
+  "/privacySettings",
+  isUserLoggedIn,
+  asyncWrap(controllersUser.renderPrivacySettings),
+);
+router.patch(
+  "/user/:id/privacy",
+  isUserLoggedIn,
+  isUserOwner,
+  asyncWrap(controllersUser.updatePrivacySettings),
 );
 
 // signup or creating new accounts (public signup for social app)

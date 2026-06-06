@@ -1,0 +1,140 @@
+<%- layout("/layout/boilerplate") %>
+
+<div class="d-flex flex-column pb-5">
+  <h1 class="m-3">Activity</h1>
+  <div
+    class="d-flex flex-wrap gap-2 justify-content-between align-items-center m-2"
+  >
+    <div>Click on a notification to make it read</div>
+    <button id="markAllReadBtn" class="btn btn-sm btn-primary">
+      Mark all read
+    </button>
+  </div>
+
+  <div id="notif-toast-area"></div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="notifications-list">
+        <% if (notifications && notifications.length) { %> <%
+        notifications.forEach(function(n) { %> <% const sender = n.sender || {};
+        %> <% const senderPic = (sender.profilePic && (typeof sender.profilePic
+        === 'string' ? sender.profilePic : sender.profilePic.url)) ||
+        '/assets/userProfilePic.png'; %>
+        <div
+          class="card mb-2 notification-card <%= n.isRead ? 'border border-secondary' : 'border border-2 border-primary' %>"
+          data-id="<%= n._id %>"
+        >
+          <div class="card-body d-flex gap-3 align-items-center">
+            <a
+              href="/user/<%= sender._id %>"
+              class="d-flex align-items-center gap-2"
+            >
+              <img
+                src="<%= senderPic %>"
+                alt="pic"
+                class="rounded-circle"
+                style="width: 48px; height: 48px; object-fit: cover"
+              />
+            </a>
+            <div class="flex-grow-1 border-secondary">
+              <div class="small text-secondary">
+                <%= new Date(n.createdAt).toLocaleString() %>
+              </div>
+              <div>
+                <% if (n.type === 'like') { %>
+                <strong class="fw-semibold d-inline text-reset"
+                  ><%= sender.name || sender.username %></strong
+                >
+                liked your post <% } else if (n.type === 'comment') { %>
+                <strong class="fw-semibold d-inline text-reset"
+                  ><%= sender.name || sender.username %></strong
+                >
+                commented: <%= (n.commentText ||
+                '').split(/\s+/).slice(0,3).join(' ') %>... <% } else if (n.type
+                === 'follow') { %>
+                <strong class="fw-semibold d-inline text-reset"
+                  ><%= sender.name || sender.username %></strong
+                >
+                started following you <% } else if (n.type === 'follow_request')
+                { %>
+
+                <!-- follow request approve/decline -->
+                <div class="d-flex flex-wrap gap-2">
+                  <strong class="fw-semibold d-inline text-reset"
+                    ><%= sender.name || sender.username %></strong
+                  >
+                  <span class="ms-1">requested to follow you</span>
+                  <div class="d-flex flex-wrap gap-2 ms-2">
+                    <button
+                      class="btn btn-sm btn-primary"
+                      data-action="follow-approve"
+                      data-user="<%= sender._id %>"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      class="btn btn-sm btn-outline-danger"
+                      data-action="follow-reject"
+                      data-user="<%= sender._id %>"
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+                <% } else if (n.type === 'friend_request') { %>
+
+                <!-- Friend request accept/reject -->
+                <div class="d-flex flex-wrap gap-2">
+                  <strong class="fw-semibold d-inline text-reset"
+                    ><%= sender.name || sender.username %></strong
+                  >
+                  <span class="ms-1">sent a friend request</span>
+                  <div class="d-flex flex-wrap gap-2">
+                    <button
+                      class="btn btn-sm btn-success"
+                      data-action="friend-accept"
+                      data-request="<%= n.request %>"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      class="btn btn-sm btn-outline-danger"
+                      data-action="friend-reject"
+                      data-request="<%= n.request %>"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+                <% } else if (n.type === 'friend_accept') { %>
+                <strong class="fw-semibold d-inline text-reset"
+                  ><%= sender.name || sender.username %></strong
+                >
+                accepted your friend request <% } %>
+              </div>
+            </div>
+            <% if (n.post && n.post.media && n.post.media.length) { %>
+            <div>
+              <a href="/post/<%= n.post._id %>">
+                <% const mediaObj = n.post.media[0]; %>
+                <% const thumb = n.post.thumbnail || null; %>
+                <% if (thumb) { %>
+                  <img src="<%= thumb %>" style="width: 48px; height: 48px; object-fit: cover" />
+                <% } else if (mediaObj && mediaObj.mediaType === 'video') { %>
+                  <video src="<%= mediaObj.url %>" style="width: 48px; height: 48px; object-fit: cover" muted preload="metadata"></video>
+                <% } else { %>
+                  <img src="<%= mediaObj.url %>" style="width: 48px; height: 48px; object-fit: cover" />
+                <% } %>
+              </a>
+            </div>
+            <% } %>
+          </div>
+        </div>
+        <% }); %> <% } else { %>
+        <div class="text-secondary">No recent activity</div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>

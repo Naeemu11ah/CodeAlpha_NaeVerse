@@ -571,6 +571,40 @@ body.dark-mode .border-secondary {
   border-color: #666 !important;
 }
 
+/* Keep primary borders using the site's primary color in dark mode
+   so components that rely on `border-primary` (e.g., unread notifications)
+   remain visually highlighted. */
+body.dark-mode .border-primary,
+body.dark-mode .border.border-primary,
+body.dark-mode .notification-card.border-primary {
+  border-color: #3636c0 !important;
+}
+
+/* Ensure the toast/flash close button is visible in both light and dark modes */
+#notif-toast-area .notif-toast-close {
+  filter: none;
+  opacity: 0.95;
+}
+body.dark-mode #notif-toast-area .notif-toast-close {
+  filter: invert(1) brightness(2);
+}
+/* Use text cross for consistent coloring; remove default bg-image */
+#notif-toast-area .notif-toast-close {
+  background-image: none !important;
+  font-size: 2rem !important;
+  line-height: 1;
+  color: #000 !important;
+  border: none !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0.25rem 0.5rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+body.dark-mode #notif-toast-area .notif-toast-close {
+  color: #fff !important;
+}
 body.dark-mode .subjectCard {
   border-color: #666;
 }
@@ -593,6 +627,11 @@ body.dark-mode footer a:hover {
 
 body.dark-mode .text-black {
   color: #e0e0e0 !important;
+}
+
+/* ensure secondary text remains readable in dark mode (used for timestamps etc) */
+body.dark-mode .text-secondary {
+  color: #bdbdbd !important;
 }
 
 /* ensure bootstrap utility text-dark also becomes light in dark mode */

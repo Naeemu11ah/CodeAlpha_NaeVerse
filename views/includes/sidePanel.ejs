@@ -16,7 +16,7 @@ function isActiveRegex(re) {
 %>
 
 <nav class="navbar navbar-expand-md bg-body-tertiary sticky-top p-0">
-  <div class="d-flex flex-column gap-3 p-3 bg-white" style="width: 220px">
+  <div class="d-flex flex-column gap-2 p-3 bg-white" style="width: 220px">
     <a class="navbar-brand d-flex align-items-center" href="/post"
       ><img
         src="/assets/favicon.ico"
@@ -33,18 +33,30 @@ function isActiveRegex(re) {
         ><span class="fw-semibold">For You</span>
       </div></a
     >
-
-      <a
-        class="nav-link d-inline <%= isActiveRegex(/^\/user\/[^\/]+\/following$/) %>"
-        href="<%= currentUser ? ('/user/' + currentUser._id + '/following') : '/login?nextFollowing=1' %>"
-        <%= !currentUser ? 'onclick="alert(\'Please login first to continue\')"' : '' %>
-        ><div class="d-flex gap-3 align-content-center">
-          <i class="fa-solid fa-people-group" style="font-size: 19px"></i
+    <a class="nav-link d-inline <%= isActiveRegex(/^\/user\/[^\/]+\/following$/) %>"
+      href="<%= currentUser ? ('/user/' + currentUser._id + '/following') : 'javascript:void(0)' %>"
+      <%= !currentUser ? 'data-login-required="1" onclick="alert(\'Please login first to continue\'); return false;"' : '' %>
+      ><div class="d-flex gap-3 align-content-center">
+          <i class="fa-solid fa-user-check" style="font-size: 19px"></i
           ><span class="fw-semibold">Following</span>
         </div></a
-      >
+    >
+    <a class="nav-link d-inline <%= isActiveExact('/friends') %>" href="<%= currentUser ? ('/user/' + currentUser._id + '/friends') : 'javascript:void(0)' %>" <%= !currentUser ? 'data-login-required="1" onclick="alert(\'Please login first to continue\'); return false;"' : '' %>>
+      <div class="d-flex gap-3 align-content-center">
+        <i class="fa-solid fa-user-friends" style="font-size: 19px"></i
+        ><span class="fw-semibold">Friends</span>
+      </div></a
+    >
+    <a id="activity-link" class="nav-link d-inline <%= isActiveExact('/activity') %>" href="<%= currentUser ? ('/user/' + currentUser._id + '/activity') : 'javascript:void(0)' %>" <%= !currentUser ? 'data-login-required="1" onclick="alert(\'Please login first to continue\'); return false;"' : '' %>>
+      <div class="d-flex gap-3 align-content-center">
+        <i class="fa-solid fa-message" style="font-size: 19px"></i>
+        <span class="fw-semibold">Activity</span>
+        <span id="notif-badge" class="badge bg-danger notif-count d-none d-flex align-items-center justify-content-center rounded-circle" style="position: relative; top: -10px; right: 15px;">0</span>
+      </div></a>
+    
+
     <a class="nav-link d-inline <%= isActiveRegex(/^\/user\/profile\/[^\/]+$/) %>"
-      href="<%= currentUser ? ('/user/profile/' + currentUser._id) : '/login' %>"
+      href="<%= currentUser ? ('/user/profile/' + currentUser._id) : 'javascript:void(0)' %>" <%= !currentUser ? 'data-login-required="1" onclick="alert(\'Please login first to continue\'); return false;"' : '' %>
     >
       <div class="d-flex gap-3 align-content-center">
         <% let profilePicSrc = '/assets/userProfilePic.png'; if (currentUser &&
@@ -61,8 +73,8 @@ function isActiveRegex(re) {
         <span class="fw-semibold">Profile</span>
       </div>
     </a>
-    <a class="nav-link d-inline no-active-color" href="/post/new"
-      ><div class="d-flex gap-3 align-content-center">
+    <a class="nav-link d-inline no-active-color" href="<%= currentUser ? '/post/new' : 'javascript:void(0)' %>" <%= !currentUser ? 'data-login-required="1" onclick="alert(\'Please login first to continue\'); return false;"' : '' %>>
+      <div class="d-flex gap-3 align-content-center">
         <i class="fa-regular fa-square-plus" style="font-size: 19px"></i
         ><span class="fw-semibold">Upload</span>
       </div></a
@@ -76,6 +88,29 @@ function isActiveRegex(re) {
       <i id="theme-icon" class="fa-solid"></i>
       <span id="theme-text">Theme</span>
     </button>
+
+    <a class="nav-link d-inline <%= isActiveExact('/privacySettings') %>" href="<%= currentUser ? '/privacySettings' : 'javascript:void(0)' %>" <%= !currentUser ? 'data-login-required="1" onclick="alert(\'Please login first to continue\'); return false;"' : '' %>>
+      <div class="d-flex gap-3 align-content-center">
+        <i class="fa-solid fa-unlock-keyhole" style="font-size: 19px"></i
+        ><span class="fw-semibold">Privacy</span>
+      </div></a
+    >
+
+<script>
+  // Ensure login-required links always show an alert even if other handlers intercept clicks.
+  (function () {
+    function handler(e) {
+      var a = e.target && e.target.closest && e.target.closest('a[data-login-required]');
+      if (!a) return;
+      e.preventDefault();
+      try { e.stopImmediatePropagation(); } catch (err) {}
+      alert('Please login first to continue');
+      return false;
+    }
+    // capture-phase so it runs before other bubble handlers
+    document.addEventListener('click', handler, true);
+  })()
+</script>
 
     <% if (currentUser) { %>
     <a class="nav-link d-inline" href="/logout"
@@ -115,14 +150,14 @@ function isActiveRegex(re) {
     <% } %>
     <hr />
     <a class="nav-link d-inline" href="/about">
-      <span class="text-secondary fw-semibold">About us</span>
+      <span class="text-secondary" style="font-size: 1rem">About us</span>
     </a>
     <a class="nav-link d-inline" href="/terms">
-      <span class="text-secondary fw-semibold">Terms & conditions</span>
+      <span class="text-secondary" style="font-size: 1rem">Terms & conditions</span>
     </a>
     <a class="nav-link d-inline" href="/privacy">
-      <span class="text-secondary fw-semibold">Policy & privacy</span>
+      <span class="text-secondary" style="font-size: 1rem">Policy & privacy</span>
     </a>
-    <span class="text-secondary fw-semibold">&copy; 2026 NaeVerse</span>
+    <span class="text-secondary" style="font-size: 1rem">&copy; 2026 NaeVerse</span>
   </div>
 </nav>

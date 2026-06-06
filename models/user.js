@@ -40,6 +40,33 @@ const userSchema = new mongoose.Schema({
       ref: "Post",
     },
   ],
+  // friends (mutual) and privacy settings
+  friends: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  // privacy: public | private
+  privacy: {
+    type: String,
+    enum: ["public", "private"],
+    default: "public",
+  },
+  // follow requests received (for private accounts)
+  pendingFollowRequests: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  // follow requests sent by this user (optional)
+  sentFollowRequests: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
   dateCreated: {
     type: Date,
     default: Date.now,

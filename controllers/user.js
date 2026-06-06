@@ -2,6 +2,9 @@ const User = require("../models/user");
 const Post = require("../models/post");
 const Comment = require("../models/comments");
 const cloudConfig = require("../cloudConfig");
+const Notification = require("../models/notification");
+const FriendRequest = require("../models/friendRequest");
+const { extractPublicIdFromUrl } = require("../utils/media");
 
 module.exports.renderSignupForm = (req, res) => {
   res.render("users/signup", {
@@ -44,7 +47,8 @@ module.exports.postingSignupForm = async (req, res, next) => {
 
 module.exports.renderLoginForm = (req, res) => {
   const next = req.query && req.query.next ? req.query.next : "";
-  const nextFollowing = req.query && req.query.nextFollowing ? req.query.nextFollowing : "";
+  const nextFollowing =
+    req.query && req.query.nextFollowing ? req.query.nextFollowing : "";
   res.render("users/login", {
     title: "Login – NaeVerse",
     metaDescription: "Login to your NaeVerse account.",
@@ -57,7 +61,8 @@ module.exports.afterLogin = async (req, res) => {
   req.flash("success", "Successfully Logged in!");
   // Prefer explicit `next` from the login form (POST body) if it's an internal path
   const bodyNext = req.body && req.body.next ? req.body.next : null;
-  const nextFollowing = req.body && req.body.nextFollowing ? req.body.nextFollowing : null;
+  const nextFollowing =
+    req.body && req.body.nextFollowing ? req.body.nextFollowing : null;
   if (bodyNext && String(bodyNext).startsWith("/")) {
     return res.redirect(bodyNext);
   }
@@ -124,6 +129,56 @@ module.exports.showUserProfile = async (req, res) => {
     }
   }
 
+  // Determine friend/request relationship for current viewer
+  let isFriend = false;
+  let isRequestSent = false;
+  let isRequestReceived = false;
+  let sentRequest = null;
+  let receivedRequest = null;
+  try {
+    if (req.user && req.user._id && String(req.user._id) !== String(user._id)) {
+      const currentId = req.user._id;
+      const fresh = await User.findById(currentId).lean();
+      if (
+        fresh &&
+        fresh.friends &&
+        fresh.friends.some((f) => String(f) === String(user._id))
+      ) {
+        isFriend = true;
+      } else {
+        sentRequest = await FriendRequest.findOne({
+          from: currentId,
+          to: user._id,
+          status: "pending",
+        }).lean();
+        receivedRequest = await FriendRequest.findOne({
+          from: user._id,
+          to: currentId,
+          status: "pending",
+        }).lean();
+        isRequestSent = !!sentRequest;
+        isRequestReceived = !!receivedRequest;
+      }
+    }
+  } catch (err) {
+    console.error("Error computing friend/request state:", err);
+  }
+
+  // If the profile is private and the current viewer is neither the owner
+  // nor a friend, hide the posts and liked posts from the response.
+  try {
+    const viewerId = req.user && req.user._id ? String(req.user._id) : null;
+    const isOwner = viewerId && String(viewerId) === String(user._id);
+    if (user.privacy === "private" && !isOwner && !isFriend) {
+      // replace actual lists with empty arrays so templates don't show them
+      posts.length = 0;
+      likedPosts.length = 0;
+    }
+  } catch (err) {
+    // don't block render on privacy-check errors
+    console.error("Error applying privacy filtering on profile:", err);
+  }
+
   res.render("users/userProfile.ejs", {
     user,
     posts,
@@ -131,6 +186,11 @@ module.exports.showUserProfile = async (req, res) => {
     profilePicSrc,
     title: `${user.name || user.username} – Profile`,
     metaDescription: `View ${user.name || user.username}'s posts and profile.`,
+    isFriend,
+    isRequestSent,
+    isRequestReceived,
+    sentRequest,
+    receivedRequest,
   });
 };
 
@@ -167,6 +227,11 @@ module.exports.toggleFollow = async (req, res) => {
     const isFollowing =
       currentUser.following &&
       currentUser.following.some((f) => String(f) === String(targetId));
+    const isPending =
+      currentUser.sentFollowRequests &&
+      currentUser.sentFollowRequests.some(
+        (f) => String(f) === String(targetId),
+      );
 
     if (isFollowing) {
       currentUser.following = currentUser.following.filter(
@@ -183,13 +248,127 @@ module.exports.toggleFollow = async (req, res) => {
         if (err) console.error("Login refresh error after unfollow:", err);
         if (req.session && typeof req.session.save === "function") {
           return req.session.save(function (saveErr) {
-            if (saveErr) console.error("Session save error after unfollow:", saveErr);
+            if (saveErr)
+              console.error("Session save error after unfollow:", saveErr);
             return res.json({ status: "unfollowed" });
           });
         }
         return res.json({ status: "unfollowed" });
       });
     } else {
+      // If a follow request has already been sent by current user, treat this as a cancellation
+      if (isPending) {
+        try {
+          currentUser.sentFollowRequests = (
+            currentUser.sentFollowRequests || []
+          ).filter((x) => String(x) !== String(targetId));
+          targetUser.pendingFollowRequests = (
+            targetUser.pendingFollowRequests || []
+          ).filter((x) => String(x) !== String(currentId));
+          await currentUser.save();
+          await targetUser.save();
+
+          // remove any follow_request notification
+          try {
+            const removed = await Notification.findOneAndDelete({
+              recipient: targetId,
+              sender: currentId,
+              type: "follow_request",
+            });
+            const io = req.app.get("io");
+            if (io) {
+              io.to(String(targetId)).emit("notification_remove", {
+                notif: removed ? removed._id : null,
+              });
+            }
+          } catch (err) {
+            console.error(
+              "Error removing follow_request notification on cancel:",
+              err,
+            );
+          }
+
+          const updatedUser = await User.findById(currentId);
+          return req.login(updatedUser, function (err) {
+            if (err)
+              console.error("Login refresh error after cancel request:", err);
+            if (req.session && typeof req.session.save === "function") {
+              return req.session.save(function (saveErr) {
+                if (saveErr)
+                  console.error(
+                    "Session save error after cancel request:",
+                    saveErr,
+                  );
+                return res.json({ status: "cancelled" });
+              });
+            }
+            return res.json({ status: "cancelled" });
+          });
+        } catch (err) {
+          console.error("Error cancelling follow request:", err);
+          return res
+            .status(500)
+            .json({ error: "Could not cancel follow request" });
+        }
+      }
+
+      // If target is private, create a follow request instead of auto-follow
+      if (targetUser.privacy === "private") {
+        // avoid duplicate requests
+        targetUser.pendingFollowRequests =
+          targetUser.pendingFollowRequests || [];
+        currentUser.sentFollowRequests = currentUser.sentFollowRequests || [];
+        if (
+          !targetUser.pendingFollowRequests.some(
+            (id) => String(id) === String(currentId),
+          )
+        ) {
+          targetUser.pendingFollowRequests.push(currentId);
+        }
+        if (
+          !currentUser.sentFollowRequests.some(
+            (id) => String(id) === String(targetId),
+          )
+        ) {
+          currentUser.sentFollowRequests.push(targetId);
+        }
+        await currentUser.save();
+        await targetUser.save();
+
+        // notify the target about follow request
+        try {
+          const notif = await Notification.create({
+            recipient: targetId,
+            sender: currentId,
+            type: "follow_request",
+          });
+          const io = req.app.get("io");
+          if (io) {
+            io.to(String(targetId)).emit("notification", {
+              _id: notif._id,
+              type: notif.type,
+              isRead: notif.isRead,
+              createdAt: notif.createdAt,
+              sender: {
+                _id: req.user._id,
+                name: req.user.name || req.user.username,
+                profilePic:
+                  (req.user.profilePic &&
+                    (typeof req.user.profilePic === "string"
+                      ? req.user.profilePic
+                      : req.user.profilePic.url)) ||
+                  "/assets/userProfilePic.png",
+              },
+            });
+          }
+        } catch (err) {
+          console.error("Could not create follow request notification:", err);
+        }
+
+        return res.json({ status: "requested" });
+      }
+
+      // public account: proceed to follow
       currentUser.following = currentUser.following || [];
       if (!currentUser.following.some((f) => String(f) === String(targetId))) {
         currentUser.following.push(targetId);
@@ -200,13 +379,48 @@ module.exports.toggleFollow = async (req, res) => {
       }
       await currentUser.save();
       await targetUser.save();
+      // create follow notification
+      try {
+        const notif = await Notification.create({
+          recipient: targetId,
+          sender: currentId,
+          type: "follow",
+        });
+        try {
+          const io = req.app.get("io");
+          if (io) {
+            io.to(String(targetId)).emit("notification", {
+              _id: notif._id,
+              type: notif.type,
+              isRead: notif.isRead,
+              createdAt: notif.createdAt,
+              sender: {
+                _id: req.user._id,
+                name: req.user.name || req.user.username,
+                profilePic:
+                  (req.user.profilePic &&
+                    (typeof req.user.profilePic === "string"
+                      ? req.user.profilePic
+                      : req.user.profilePic.url)) ||
+                  "/assets/userProfilePic.png",
+              },
+            });
+          }
+        } catch (err) {
+          console.error("Socket emit error for follow notification:", err);
+        }
+      } catch (err) {
+        console.error("Could not create follow notification:", err);
+      }
+
       // fetch the fresh user from DB to avoid any stale mongoose doc state
       const updatedUser = await User.findById(currentId);
       return req.login(updatedUser, function (err) {
         if (err) console.error("Login refresh error after follow:", err);
         if (req.session && typeof req.session.save === "function") {
           return req.session.save(function (saveErr) {
-            if (saveErr) console.error("Session save error after follow:", saveErr);
+            if (saveErr)
+              console.error("Session save error after follow:", saveErr);
             return res.json({ status: "followed" });
           });
         }
@@ -252,10 +466,98 @@ module.exports.videosFollowingAccounts = async (req, res, next) => {
       .populate({ path: "comments", populate: { path: "user" } })
       .lean();
 
+    // Filter out private-account posts unless the current viewer is a friend
+    const viewerId = req.user && req.user._id ? String(req.user._id) : null;
+    let viewer = null;
+    if (viewerId) {
+      try {
+        viewer = await User.findById(viewerId).lean();
+      } catch (err) {
+        viewer = null;
+      }
+    }
+
+    const filtered = (posts || []).filter((p) => {
+      const owner = p.user;
+      if (!owner) return false;
+      if (!owner.privacy || owner.privacy !== "private") return true;
+      if (!viewer) return false;
+      if (String(owner._id) === String(viewerId)) return true;
+      if (viewer.friends && Array.isArray(viewer.friends)) {
+        return viewer.friends.some((f) => String(f) === String(owner._id));
+      }
+      return false;
+    });
+
     res.render("posts/allPosts", {
-      posts,
+      posts: filtered,
       title: "Following – NaeVerse",
       metaDescription: "Posts from accounts you follow.",
+    });
+  } catch (err) {
+    return next ? next(err) : res.redirect("/post");
+  }
+};
+
+module.exports.videosFriendsAccounts = async (req, res, next) => {
+  try {
+    // Ensure user is authenticated
+    if (!req.user) {
+      req.flash && req.flash("error", "Please login to view friends' posts");
+      return res.redirect("/login");
+    }
+
+    const { id } = req.params;
+    const user = await User.findById(id).lean();
+    if (!user) {
+      req.flash && req.flash("error", "User not found");
+      return res.redirect("/post");
+    }
+
+    const friends = user.friends && user.friends.length ? user.friends : [];
+
+    // If no friends, render empty list
+    if (!friends.length) {
+      return res.render("posts/allPosts", {
+        posts: [],
+        title: "Friends – NaeVerse",
+        metaDescription: "Posts from your friends.",
+      });
+    }
+
+    const posts = await Post.find({ user: { $in: friends } })
+      .sort({ createdAt: -1 })
+      .populate("user")
+      .populate({ path: "comments", populate: { path: "user" } })
+      .lean();
+
+    // Filter by privacy to ensure viewer is allowed to see each post
+    const viewerId = req.user && req.user._id ? String(req.user._id) : null;
+    let viewer = null;
+    if (viewerId) {
+      try {
+        viewer = await User.findById(viewerId).lean();
+      } catch (err) {
+        viewer = null;
+      }
+    }
+
+    const filtered = (posts || []).filter((p) => {
+      const owner = p.user;
+      if (!owner) return false;
+      if (!owner.privacy || owner.privacy !== "private") return true;
+      if (!viewer) return false;
+      if (String(owner._id) === String(viewerId)) return true;
+      if (viewer.friends && Array.isArray(viewer.friends)) {
+        return viewer.friends.some((f) => String(f) === String(owner._id));
+      }
+      return false;
+    });
+
+    res.render("posts/allPosts", {
+      posts: filtered,
+      title: "Friends – NaeVerse",
+      metaDescription: "Posts from your friends.",
     });
   } catch (err) {
     return next ? next(err) : res.redirect("/post");
@@ -555,5 +857,222 @@ module.exports.deleteUserProfilePic = async (req, res) => {
     console.error(err);
     req.flash("error", "Could not remove profile picture.");
     return res.redirect(`/user/profile/${id}`);
+  }
+};
+
+module.exports.showUserActivity = async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findById(id);
+  // fetch recent notifications for the user
+  const notifications = await Notification.find({ recipient: id })
+    .sort({ createdAt: -1 })
+    .limit(100)
+    .populate("sender", "name username profilePic")
+    .populate("post", "media")
+    .lean();
+
+  // Attach thumbnails for video media when possible
+  try {
+    notifications.forEach((n) => {
+      try {
+        if (!n.post || !n.post.media || !n.post.media.length) return;
+        const media = n.post.media[0];
+        if (!media) return;
+        if (media.mediaType === "video") {
+          const publicId = media.filename || extractPublicIdFromUrl(media.url);
+          if (publicId && cloudConfig && cloudConfig.cloudinary) {
+            try {
+              n.post.thumbnail = cloudConfig.cloudinary.url(publicId, {
+                resource_type: "video",
+                format: "jpg",
+                transformation: [{ width: 48, height: 48, crop: "fill" }],
+              });
+            } catch (err) {
+              n.post.thumbnail = media.url || null;
+            }
+          } else {
+            n.post.thumbnail = media.url || null;
+          }
+        } else {
+          n.post.thumbnail = media.url || null;
+        }
+      } catch (err) {}
+    });
+  } catch (err) {}
+
+  res.render("users/userActivity.ejs", {
+    user,
+    notifications,
+    title: "Activity – NaeVerse",
+    metaDescription: "View your recent activity and interactions.",
+  });
+};
+
+module.exports.renderPrivacySettings = async (req, res) => {
+  const userId = req.user && req.user._id;
+  if (!userId) return res.redirect("/login");
+  const user = await User.findById(userId).lean();
+  res.render("users/privacySettings", {
+    user,
+    title: "Privacy Settings – NaeVerse",
+  });
+};
+
+module.exports.updatePrivacySettings = async (req, res) => {
+  const { id } = req.params;
+  const { privacy } = req.body || {};
+  if (!req.user || String(req.user._id) !== String(id))
+    return res.status(403).json({ error: "Not authorized" });
+  if (!["public", "private"].includes(privacy))
+    return res.status(400).json({ error: "Invalid privacy setting" });
+  const user = await User.findById(id);
+  if (!user) return res.status(404).json({ error: "User not found" });
+  user.privacy = privacy;
+  await user.save();
+  if (req.xhr) return res.json({ success: true });
+  req.flash("success", "Privacy settings updated");
+  res.redirect(`/user/profile/${id}`);
+};
+
+module.exports.approveFollowRequest = async (req, res) => {
+  const { id, requesterId } = req.params;
+  const currentId = req.user && req.user._id;
+  if (!currentId || String(currentId) !== String(id))
+    return res.status(403).json({ error: "Not authorized" });
+
+  const targetUser = await User.findById(id);
+  const requester = await User.findById(requesterId);
+  if (!targetUser || !requester)
+    return res.status(404).json({ error: "User not found" });
+
+  // remove request and add follower/following
+  targetUser.pendingFollowRequests = (
+    targetUser.pendingFollowRequests || []
+  ).filter((x) => String(x) !== String(requesterId));
+  requester.sentFollowRequests = (requester.sentFollowRequests || []).filter(
+    (x) => String(x) !== String(id),
+  );
+
+  targetUser.followers = targetUser.followers || [];
+  if (!targetUser.followers.some((f) => String(f) === String(requesterId)))
+    targetUser.followers.push(requesterId);
+
+  requester.following = requester.following || [];
+  if (!requester.following.some((f) => String(f) === String(id)))
+    requester.following.push(id);
+
+  await targetUser.save();
+  await requester.save();
+
+  // notify requester that their follow request was approved
+  try {
+    const notif = await Notification.create({
+      recipient: requesterId,
+      sender: id,
+      type: "follow",
+    });
+    const io = req.app.get("io");
+    if (io) {
+      io.to(String(requesterId)).emit("notification", {
+        _id: notif._id,
+        type: notif.type,
+        isRead: notif.isRead,
+        createdAt: notif.createdAt,
+        sender: {
+          _id: targetUser._id,
+          name: targetUser.name || targetUser.username,
+          profilePic:
+            (targetUser.profilePic &&
+              (typeof targetUser.profilePic === "string"
+                ? targetUser.profilePic
+                : targetUser.profilePic.url)) ||
+            "/assets/userProfilePic.png",
+        },
+      });
+    }
+  } catch (err) {
+    console.error("Could not notify follow approval:", err);
+  }
+
+  // remove the original follow_request notification (cleanup)
+  try {
+    const removed = await Notification.findOneAndDelete({
+      recipient: id,
+      sender: requesterId,
+      type: "follow_request",
+    });
+    const io = req.app.get("io");
+    if (io) {
+      io.to(String(id)).emit("notification_remove", {
+        notif: removed ? removed._id : null,
+        request: null,
+      });
+    }
+  } catch (err) {
+    console.error(
+      "Error removing follow_request notification after approve:",
+      err,
+    );
+  }
+
+  res.json({ success: true });
+};
+
+module.exports.rejectFollowRequest = async (req, res) => {
+  const { id, requesterId } = req.params;
+  const currentId = req.user && req.user._id;
+  if (!currentId || String(currentId) !== String(id))
+    return res.status(403).json({ error: "Not authorized" });
+  const targetUser = await User.findById(id);
+  const requester = await User.findById(requesterId);
+  if (!targetUser || !requester)
+    return res.status(404).json({ error: "User not found" });
+  targetUser.pendingFollowRequests = (
+    targetUser.pendingFollowRequests || []
+  ).filter((x) => String(x) !== String(requesterId));
+  requester.sentFollowRequests = (requester.sentFollowRequests || []).filter(
+    (x) => String(x) !== String(id),
+  );
+  await targetUser.save();
+  await requester.save();
+  // remove any follow_request notification for the recipient
+  try {
+    const removed = await Notification.findOneAndDelete({
+      recipient: id,
+      sender: requesterId,
+      type: "follow_request",
+    });
+    const io = req.app.get("io");
+    if (io) {
+      io.to(String(id)).emit("notification_remove", {
+        notif: removed ? removed._id : null,
+        request: null,
+      });
+    }
+  } catch (err) {
+    console.error("Error removing follow_request notification on reject:", err);
+  }
+  res.json({ success: true });
+};
+
+module.exports.userInfo = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const user = await User.findById(id).lean();
+    if (!user) return res.status(404).json({ error: "User not found" });
+    const pp = user.profilePic;
+    const profilePic = pp
+      ? typeof pp === "string"
+        ? pp
+        : pp.url || "/assets/userProfilePic.png"
+      : "/assets/userProfilePic.png";
+    return res.json({
+      _id: user._id,
+      name: user.name || user.username || "",
+      username: user.username || "",
+      profilePic,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: "Server error" });
   }
 };

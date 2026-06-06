@@ -8,11 +8,15 @@
         e.preventDefault();
         var targetId = btn.getAttribute("data-user-id");
         try {
-          var resp = await fetch("/user/" + targetId + "/follow", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "same-origin",
-          });
+            var resp = await fetch("/user/" + targetId + "/follow", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest",
+                Accept: "application/json",
+              },
+              credentials: "same-origin",
+            });
           if (!resp.ok) {
             var err = await resp.json().catch(function () {
               return { error: "Request failed" };
@@ -35,6 +39,9 @@
               ) {
                 window.currentUser.following.push(targetId);
               }
+              if (window.currentUser.sentFollowRequests) {
+                window.currentUser.sentFollowRequests = window.currentUser.sentFollowRequests.filter(function (f) { return String(f) !== String(targetId); });
+              }
             } catch (e) {}
           } else if (data.status === "unfollowed") {
             btn.textContent = "Follow";
@@ -49,9 +56,32 @@
               }
             } catch (e) {}
           }
+
+          // handle private account request state
+          if (data.status === "requested") {
+            btn.textContent = "Cancel Request";
+            btn.classList.remove("btn-danger");
+            btn.classList.add("btn-outline-secondary");
+            try {
+              window.currentUser = window.currentUser || {};
+              window.currentUser.sentFollowRequests = window.currentUser.sentFollowRequests || [];
+              if (!window.currentUser.sentFollowRequests.some(function (f) { return String(f) === String(targetId); })) {
+                window.currentUser.sentFollowRequests.push(targetId);
+              }
+            } catch (e) {}
+          } else if (data.status === "cancelled") {
+            btn.textContent = "Follow";
+            btn.classList.remove("btn-outline-secondary");
+            btn.classList.add("btn-danger");
+            try {
+              if (window.currentUser && window.currentUser.sentFollowRequests) {
+                window.currentUser.sentFollowRequests = window.currentUser.sentFollowRequests.filter(function (f) { return String(f) !== String(targetId); });
+              }
+            } catch (e) {}
+          }
         } catch (err) {
           console.error(err);
-          alert("Please Login to continue.");
+          alert("Please login to continue.");
         }
       });
     }

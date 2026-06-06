@@ -1,12 +1,19 @@
 # NaeVerse
 
-NaeVerse is a full-stack social media web application, this was assigned and build as internship project while working at CodeAlpha and it's design is inspired by TikTok. Users can share images and videos, like posts, comment, follow other users, and manage their profiles.
+NaeVerse is a full-stack social media web application, this was assigned and build as internship project while working at CodeAlpha, later modified and added more features during another internship at Arch Technologies and it's design is inspired by TikTok. Users can share images and videos, like posts, comment, follow other users, send friend requests, see their notification, make their account public/private, manage their profiles and many more.
 
 ## Internship Information
 
-- _Internship Provider:_ CodeAlpha
+- _First internship Provider:_ `CodeAlpha`
 - _Duration:_ 1 May 2026 – 29 May 2026
-- _Developer:_ Naeemullah
+
+---
+
+- _Second internship provider:_ `Arch Technologies`
+- _Duration:_ 1 June 2026 – 29 June 2026
+
+---
+
 - _Project Type:_ Full-Stack Social Media Web Application
 
 ## Live Links
@@ -30,7 +37,7 @@ NaeVerse is a full-stack social media web application, this was assigned and bui
 - View profile
 - Edit name, username, and bio
 - Change profile picture
-- View followers and following
+- View followers, following and fiends count
 - Delete account with complete data cleanup
 
 ### Posts
@@ -52,11 +59,12 @@ NaeVerse is a full-stack social media web application, this was assigned and bui
 
 - For You feed (all posts)
 - Following feed (posts from followed users)
+- Friends feed (posts from friends)
 
 ### Search
 
 - Search for users and posts
-- Results page with separate tabs
+- Results page with separate tabs (post & user tabs)
 
 ### Profile Tabs
 
@@ -122,12 +130,20 @@ When a user deletes their account, the following data is permanently removed:
 
 ## Required Internship Features
 
-The core internship requirements included:
+CodeAlpha internship requirements:
 
 - User Profiles
 - Posting
 - Comments and Like System
 - Follow/Unfollow System
+
+Arch Technologies internship requirements:
+
+- (All as codeAlpha)
+- Sending friend request, accepting and declining
+- Making account private/public and managing posts visibility according it
+- Real time updates using web sockets
+- Show activity notification of follow, like, comment and ETC
 
 ## Additional Features
 

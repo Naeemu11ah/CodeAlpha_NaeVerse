@@ -101,11 +101,39 @@ module.exports.renderSearchResults = async (req, res) => {
   if (!tokens.length) {
     // fallback to the original strict regex search for very short tokens
     const regex = new RegExp(escapeRegex(query), "i");
-    const posts = await Post.find({ caption: regex }).sort({ createdAt: -1 }).limit(50);
+    // include owner data so we can filter private accounts
+    const posts = await Post.find({ caption: regex })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .populate("user")
+      .lean();
     const users = await User.find({ $or: [{ name: regex }, { username: regex }] })
       .select("-password -email -__v")
       .limit(50);
-    return res.render("searchedResults", { posts, users, searchQuery: query });
+
+    // filter posts by privacy
+    const viewerId = req.user && req.user._id ? String(req.user._id) : null;
+    let viewer = null;
+    if (viewerId) {
+      try {
+        viewer = await User.findById(viewerId).lean();
+      } catch (err) {
+        viewer = null;
+      }
+    }
+    const filteredPosts = (posts || []).filter((p) => {
+      const owner = p.user;
+      if (!owner) return false;
+      if (!owner.privacy || owner.privacy !== "private") return true;
+      if (!viewer) return false;
+      if (String(owner._id) === String(viewerId)) return true;
+      if (viewer.friends && Array.isArray(viewer.friends)) {
+        return viewer.friends.some((f) => String(f) === String(owner._id));
+      }
+      return false;
+    });
+
+    return res.render("searchedResults", { posts: filteredPosts, users, searchQuery: query });
   }
 
   // Build a MongoDB OR query that matches any token in caption/name/username
@@ -141,13 +169,49 @@ module.exports.renderSearchResults = async (req, res) => {
     .sort((a, b) => b.score - a.score)
     .slice(0, 50)
     .map((x) => x.item);
-
-  res.render("searchedResults", { posts: scoredPosts, users: scoredUsers, searchQuery: query });
+  // Filter scored posts by owner privacy (only friends can see private accounts)
+  try {
+    const viewerId = req.user && req.user._id ? String(req.user._id) : null;
+    let viewer = null;
+    if (viewerId) {
+      try {
+        viewer = await User.findById(viewerId).lean();
+      } catch (err) {
+        viewer = null;
+      }
+    }
+    const ownerIds = Array.from(new Set((scoredPosts || []).map((p) => String(p.user))));
+    const owners = ownerIds.length ? await User.find({ _id: { $in: ownerIds } }).select("_id privacy").lean() : [];
+    const ownerMap = (owners || []).reduce((m, o) => { m[String(o._id)] = o; return m; }, {});
+    const filtered = (scoredPosts || []).filter((p) => {
+      const owner = ownerMap[String(p.user)];
+      if (!owner) return true; // keep if we couldn't find the owner doc
+      if (!owner.privacy || owner.privacy !== "private") return true;
+      if (!viewer) return false;
+      if (String(owner._id) === String(viewerId)) return true;
+      if (viewer.friends && Array.isArray(viewer.friends)) {
+        return viewer.friends.some((f) => String(f) === String(owner._id));
+      }
+      return false;
+    });
+    const scoredPostsFiltered = filtered.slice(0, 50);
+    return res.render("searchedResults", { posts: scoredPostsFiltered, users: scoredUsers, searchQuery: query });
+  } catch (err) {
+    return res.render("searchedResults", { posts: scoredPosts, users: scoredUsers, searchQuery: query });
+  }
 };
 
 module.exports.renderAboutPage = async (req, res) => {
   res.render("pages/about", {
     title: "About – UOS Past Papers",
     metaDescription: "Learn about the UOS Past Papers project and our mission.",
+  });
+};
+
+
+module.exports.renderPrivacySettingsPage = async (req, res) => {
+  res.render("pages/privacySettings.ejs", {
+    title: "Privacy Settings – NaeVerse",
+    metaDescription: "Manage your privacy settings on NaeVerse.",
   });
 };

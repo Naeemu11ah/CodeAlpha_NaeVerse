@@ -1,11 +1,27 @@
-<!--bottom panel for mobile screens-->
-<% function isActive(prefix) { if (!currentPath) return ""; return
-currentPath.startsWith(prefix) ? "active" : ""; } %>
+<%
+function isActiveExact(path) {
+  if (!currentPath) return "";
+  return currentPath === path ? "active" : "";
+}
+function isActiveStartsWith(prefix) {
+  if (!currentPath) return "";
+  return currentPath === prefix || currentPath.startsWith(prefix + "/") ? "active" : "";
+}
+function isActiveRegex(re) {
+  if (!currentPath) return "";
+  return re.test(currentPath) ? "active" : "";
+}
+function isActive(prefix) {
+  if (!currentPath) return "";
+  return currentPath.startsWith(prefix) ? "active" : "";
+}
+%>
 
+<!--bottom panel for mobile screens-->
 <div
   class="bottom-nav d-flex align-items-center justify-content-between px-4 py-2"
   style="
-  border-top: 1px solid #ffffff1f;
+    border-top: 1px solid #ffffff1f;
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
@@ -16,6 +32,7 @@ currentPath.startsWith(prefix) ? "active" : ""; } %>
     max-width: 600px;
   "
 >
+  <!-- home icon -->
   <a
     class="nav-link d-inline text-decoration-none <%= isActive('/post') %>"
     href="/post"
@@ -29,6 +46,21 @@ currentPath.startsWith(prefix) ? "active" : ""; } %>
       >
     </div>
   </a>
+
+  <!-- friend icon -->
+  <a
+    class="nav-link d-inline text-decoration-none <%= isActiveExact('/friends') %>"
+    href="<%= currentUser ? ('/user/' + currentUser._id + '/friends') : 'javascript:void(0)' %>"
+    <%= !currentUser ? 'data-login-required="1" onclick="alert(\'Please login first to continue\'); return false;"' : '' %>
+  >
+    <div class="d-flex flex-column align-items-center gap-1">
+      <i class="fa-solid fa-user-friends text-secondary" style="font-size: 20px"></i>
+      <span class="fw-semibold text-secondary"
+        style="font-size: 12px; line-height: 1">Friends</span>
+    </div>
+  </a>
+
+  <!-- create post icon -->
   <a class="nav-link d-inline no-active-color" href="/post/new">
     <div
       class="d-flex flex-column align-items-center rounded-3"
@@ -45,6 +77,30 @@ currentPath.startsWith(prefix) ? "active" : ""; } %>
       ></i>
     </div>
   </a>
+
+  <!-- activity -->
+   <div class="d-flex">
+  <a
+    id="activity-link"
+    class="nav-link d-inline text-decoration-none <%= isActiveExact('/activity') %>"
+    href="<%= currentUser ? ('/user/' + currentUser._id + '/activity') : 'javascript:void(0)' %>"
+    <%= !currentUser ? 'data-login-required="1" onclick="alert(\'Please login first to continue\'); return false;"' : '' %>
+  >
+    <div class="d-flex flex-column align-items-center gap-1">
+      <i class="fa-solid fa-message text-secondary" style="font-size: 21px"></i>
+      <span class="fw-semibold text-secondary"
+        style="font-size: 12px; line-height: 1">Activity</span>
+      </div>
+    </a>
+    <span
+      id="notif-badge"
+      class="badge bg-danger notif-count d-none d-flex align-items-center justify-content-center rounded-circle"
+      style="position: relative; top:-10px; right: 10px; font-size: 10px; width: 16px; height: 16px;"
+      >0</span
+    >
+  </div>
+
+  <!-- profile icon -->
   <a
     class="nav-link d-inline text-decoration-none <%= isActive('/user/profile') %>"
     href="<%= currentUser ? ('/user/profile/' + currentUser._id) : '/login' %>"

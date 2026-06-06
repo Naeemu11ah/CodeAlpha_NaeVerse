@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Post = require("../models/post");
 const Comment = require("../models/comments");
+const Notification = require("../models/notification");
 const { isUserLoggedIn, isOwner } = require("../utils/middlewares");
 const {
   validateNewPost,
@@ -11,15 +12,51 @@ const {
 const asyncWrap = require("../utils/asyncWrap");
 const multer = require("multer");
 const { storage } = require("../cloudConfig");
+const cloudConfig = require("../cloudConfig");
 const upload = multer({ storage });
 const { deleteCloudinaryMedia } = require("../utils/media");
+const { extractPublicIdFromUrl } = require("../utils/media");
+const User = require("../models/user");
 
 module.exports.gettingAllPosts = async (req, res) => {
+  // Load current viewer (if any) so we can check friendship
+  const viewerId = req.user && req.user._id ? String(req.user._id) : null;
+  let viewer = null;
+  if (viewerId) {
+    try {
+      viewer = await User.findById(viewerId).lean();
+    } catch (err) {
+      viewer = null;
+    }
+  }
+
+  // Fetch posts and populate owners/comments
   const posts = await Post.find()
+    .sort({ createdAt: -1 })
     .populate("user")
-    .populate({ path: "comments", populate: { path: "user" } });
+    .populate({ path: "comments", populate: { path: "user" } })
+    .lean();
+
+  // Filter out posts from private accounts unless the viewer is the owner
+  // or is a friend of the post owner
+  const filtered = posts.filter((p) => {
+    const owner = p.user;
+    if (!owner) return false;
+    // If account is public, show
+    if (!owner.privacy || owner.privacy !== "private") return true;
+    // If no viewer (guest), hide private posts
+    if (!viewer) return false;
+    // Owner always sees their own posts
+    if (String(owner._id) === String(viewerId)) return true;
+    // Friends can see private posts
+    if (viewer.friends && Array.isArray(viewer.friends)) {
+      return viewer.friends.some((f) => String(f) === String(owner._id));
+    }
+    return false;
+  });
+
   res.render("posts/allPosts", {
-    posts,
+    posts: filtered,
     title: "Posts – NaeVerse",
     metaDescription: "Browse all posts on NaeVerse.",
   });
@@ -73,6 +110,31 @@ module.exports.gettingSinglePost = async (req, res) => {
     return res.redirect("back");
   }
 
+  // Enforce privacy: if the post owner's account is private, only allow
+  // the owner or their friends to view this post.
+  try {
+    const owner = post.user;
+    if (owner && owner.privacy === "private") {
+      const viewerId = req.user && req.user._id ? String(req.user._id) : null;
+      let viewer = null;
+      if (viewerId) {
+        try {
+          viewer = await User.findById(viewerId).lean();
+        } catch (e) {
+          viewer = null;
+        }
+      }
+      const isOwner = viewerId && String(owner._id) === String(viewerId);
+      const isFriend = viewer && viewer.friends && Array.isArray(viewer.friends) && viewer.friends.some((f) => String(f) === String(owner._id));
+      if (!isOwner && !isFriend) {
+        req.flash && req.flash("error", "This account is private. Only friends can view posts.");
+        return res.redirect("/post");
+      }
+    }
+  } catch (err) {
+    console.error("Privacy check error:", err);
+  }
+
   // Default to only the clicked post. If `list` and `listOwner` are provided,
   // load that set so the client can scroll through the list.
   let postsList = [post];
@@ -88,6 +150,31 @@ module.exports.gettingSinglePost = async (req, res) => {
           .populate("user")
           .populate({ path: "comments", populate: { path: "user" } })
           .sort({ _id: -1 });
+      }
+      // Apply the same privacy filtering to the list (For profile/list views)
+      try {
+        const viewerId = req.user && req.user._id ? String(req.user._id) : null;
+        let viewer = null;
+        if (viewerId) {
+          try {
+            viewer = await User.findById(viewerId).lean();
+          } catch (e) {
+            viewer = null;
+          }
+        }
+        postsList = (postsList || []).filter((p) => {
+          const owner = p && p.user;
+          if (!owner) return false;
+          if (!owner.privacy || owner.privacy !== "private") return true;
+          if (!viewer) return false;
+          if (String(owner._id) === String(viewerId)) return true;
+          if (viewer.friends && Array.isArray(viewer.friends)) {
+            return viewer.friends.some((f) => String(f) === String(owner._id));
+          }
+          return false;
+        });
+      } catch (err) {
+        // ignore filtering errors and fall back to unfiltered list
       }
     } catch (err) {
       postsList = [post];
@@ -157,6 +244,77 @@ module.exports.toggleLike = async (req, res) => {
   await post.save();
   const liked = post.likes.some((id) => String(id) === String(userId));
   const likesCount = post.likes.length;
+
+  // create a notification and emit in real-time when someone likes another user's post
+  try {
+    if (liked && String(post.user) !== String(userId)) {
+      const notif = await Notification.create({
+        recipient: post.user,
+        sender: userId,
+        type: "like",
+        post: post._id,
+      });
+      // emit via socket.io (app stores io on app settings)
+      try {
+        const io = req.app.get("io");
+        if (io) {
+          // compute a usable thumbnail for the post (video -> jpg thumb)
+          let postThumbnail = null;
+          try {
+            if (post.media && post.media.length) {
+              const m = post.media[0];
+              if (m) {
+                if (m.mediaType === "video") {
+                  const publicId = m.filename || extractPublicIdFromUrl(m.url);
+                  if (publicId && cloudConfig && cloudConfig.cloudinary) {
+                    try {
+                      postThumbnail = cloudConfig.cloudinary.url(publicId, {
+                        resource_type: "video",
+                        format: "jpg",
+                        transformation: [{ width: 48, height: 48, crop: "fill" }],
+                      });
+                    } catch (err) {
+                      postThumbnail = m.url || null;
+                    }
+                  } else {
+                    postThumbnail = m.url || null;
+                  }
+                } else {
+                  postThumbnail = m.url || null;
+                }
+              }
+            }
+          } catch (err) {}
+
+          const emitterPayload = {
+            _id: notif._id,
+            type: notif.type,
+            isRead: notif.isRead,
+            createdAt: notif.createdAt,
+            sender: {
+              _id: req.user._id,
+              name: req.user.name || req.user.username,
+              profilePic:
+                (req.user.profilePic &&
+                  (typeof req.user.profilePic === "string"
+                    ? req.user.profilePic
+                    : req.user.profilePic.url)) ||
+                "/assets/userProfilePic.png",
+            },
+            post: {
+              _id: post._id,
+              thumbnail: postThumbnail,
+            },
+          };
+          io.to(String(post.user)).emit("notification", emitterPayload);
+        }
+      } catch (err) {
+        console.error("Socket emit error for like notification:", err);
+      }
+    }
+  } catch (err) {
+    console.error("Could not create like notification:", err);
+  }
   // if AJAX / fetch request, send JSON so client can update UI without reload
   const wantsJson =
     req.xhr || (req.get("Accept") || "").includes("application/json");
@@ -205,6 +363,83 @@ module.exports.addingComment = async (req, res) => {
     },
     dateCreated: comment.dateCreated,
   };
+
+  // create a comment notification for the post owner (unless commenter is owner)
+  try {
+    if (String(post.user) !== String(req.user._id)) {
+      const notif = await Notification.create({
+        recipient: post.user,
+        sender: req.user._id,
+        type: "comment",
+        post: post._id,
+        commentText: comment.text,
+      });
+      try {
+        const io = req.app.get("io");
+        if (io) {
+          const textSnippet = (comment.text || "")
+            .split(/\s+/)
+            .slice(0, 3)
+            .join(" ");
+          // compute a usable thumbnail for the post (video -> jpg thumb)
+          let postThumbnail = null;
+          try {
+            if (post.media && post.media.length) {
+              const m = post.media[0];
+              if (m) {
+                if (m.mediaType === "video") {
+                  const publicId = m.filename || extractPublicIdFromUrl(m.url);
+                  if (publicId && cloudConfig && cloudConfig.cloudinary) {
+                    try {
+                      postThumbnail = cloudConfig.cloudinary.url(publicId, {
+                        resource_type: "video",
+                        format: "jpg",
+                        transformation: [{ width: 48, height: 48, crop: "fill" }],
+                      });
+                    } catch (err) {
+                      postThumbnail = m.url || null;
+                    }
+                  } else {
+                    postThumbnail = m.url || null;
+                  }
+                } else {
+                  postThumbnail = m.url || null;
+                }
+              }
+            }
+          } catch (err) {}
+
+          const emitterPayload = {
+            _id: notif._id,
+            type: notif.type,
+            isRead: notif.isRead,
+            createdAt: notif.createdAt,
+            commentText: comment.text,
+            commentSnippet: textSnippet,
+            sender: {
+              _id: req.user._id,
+              name: req.user.name || req.user.username,
+              profilePic:
+                (req.user.profilePic &&
+                  (typeof req.user.profilePic === "string"
+                    ? req.user.profilePic
+                    : req.user.profilePic.url)) ||
+                "/assets/userProfilePic.png",
+            },
+            post: {
+              _id: post._id,
+              thumbnail: postThumbnail,
+            },
+          };
+          io.to(String(post.user)).emit("notification", emitterPayload);
+        }
+      } catch (err) {
+        console.error("Socket emit error for comment notification:", err);
+      }
+    }
+  } catch (err) {
+    console.error("Could not create comment notification:", err);
+  }
 
   res.json({
     success: true,

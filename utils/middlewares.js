@@ -1,5 +1,15 @@
 module.exports.isUserLoggedIn = (req, res, next) => {
   if (!req.isAuthenticated()) {
+    // Detect AJAX / JSON requests and respond with 401 JSON instead of redirecting
+    const wantsJson =
+      (req.get && req.get("Accept") && req.get("Accept").indexOf("application/json") !== -1) ||
+      req.xhr ||
+      (req.get && req.get("X-Requested-With") === "XMLHttpRequest");
+
+    if (wantsJson) {
+      return res.status(401).json({ error: "Please login to continue." });
+    }
+
     req.session.userPrevPage = req.originalUrl;
     req.flash("error", "Please log in to continue!");
     return res.redirect("/login");

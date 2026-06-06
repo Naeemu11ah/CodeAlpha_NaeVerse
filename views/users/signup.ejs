@@ -1,5 +1,27 @@
 <%- layout("/layout/boilerplate") %>
 <body>
+  <!-- offcanvas menu -->
+  <div>
+    <button
+      class="mobile-menu-toggle"
+      type="button"
+      style="
+        background-color: none !important;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 1030;
+      "
+      data-bs-toggle="offcanvas"
+      data-bs-target="#mobileMenu"
+      aria-controls="mobileMenu"
+      aria-label="Open menu"
+    >
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+
+  <!-- sign up form -->
   <div class="outermostDiv">
     <div style="width: 300px">
       <h2 class="mb-3 text-center fw-bold">Sign up</h2>
@@ -49,5 +71,6 @@
     </div>
   </div>
 
+  <%- include("../includes/offcanvas") %>
   <script src="/js/showPassswordCheckbox.js"></script>
 </body>

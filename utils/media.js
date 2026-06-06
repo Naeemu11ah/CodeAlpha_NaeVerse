@@ -36,4 +36,5 @@ async function deleteCloudinaryMedia(mediaItem) {
 
 module.exports = {
   deleteCloudinaryMedia,
+  extractPublicIdFromUrl,
 };
